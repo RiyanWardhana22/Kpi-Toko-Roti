@@ -50,7 +50,7 @@ try {
                                                                                                             <td><?php echo htmlspecialchars($produk['id_produk']); ?></td>
                                                                                                             <td><?php echo htmlspecialchars($produk['nama_produk']); ?></td>
                                                                                                             <td>
-                                                                                                                        <a href="#" class="btn btn-info btn-sm">Detail (Resep)</a>
+                                                                                                                        <a href="<?php echo base_url('index.php?page=resep&id_produk=' . $produk['id_produk']); ?>" class="btn btn-info btn-sm">Detail (Resep)</a>
                                                                                                                         <a href="<?php echo base_url('index.php?page=produk_form&id=' . $produk['id_produk']); ?>" class="btn btn-warning btn-sm">Edit</a>
                                                                                                                         <a href="<?php echo base_url('index.php?page=produk_hapus&id=' . $produk['id_produk']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Anda yakin ingin menghapus produk ini? Ini juga akan menghapus semua resep yang terkait.');">Hapus</a>
                                                                                                             </td>
