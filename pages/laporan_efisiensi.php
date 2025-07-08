@@ -96,16 +96,16 @@ $laporan_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <tr>
                                     <td><?php echo htmlspecialchars($data['nama_produk']); ?></td>
                                     <td><?php echo htmlspecialchars($data['nama_bahan']); ?></td>
-                                    <td class="text-end"><?php echo number_format($standar, 3) . ' ' . htmlspecialchars($data['satuan']); ?></td>
-                                    <td class="text-end"><?php echo number_format($aktual, 3) . ' ' . htmlspecialchars($data['satuan']); ?></td>
+                                    <td class="text-end"><?php echo number_format($standar) . ' ' . htmlspecialchars($data['satuan']); ?></td>
+                                    <td class="text-end"><?php echo number_format($aktual) . ' ' . htmlspecialchars($data['satuan']); ?></td>
                                     <td class="text-end">
                                         <span class="badge bg-<?php echo ($selisih > 0) ? 'danger' : 'success'; ?>">
-                                            <?php echo number_format($selisih, 3) . ' ' . htmlspecialchars($data['satuan']); ?>
+                                            <?php echo number_format($selisih) . ' ' . htmlspecialchars($data['satuan']); ?>
                                         </span>
                                     </td>
                                     <td class="text-end">
                                         <span class="badge bg-<?php echo ($efisiensi < 95) ? 'warning' : 'info'; ?>">
-                                            <?php echo number_format($efisiensi, 2) . '%'; ?>
+                                            <?php echo number_format($efisiensi) . '%'; ?>
                                         </span>
                                     </td>
                                 </tr>
