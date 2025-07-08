@@ -19,7 +19,8 @@ $allowed_pages =
                         'produksi_input_form',
                         'laporan',
                         'laporan_waste',
-                        'laporan_efisiensi'
+                        'laporan_efisiensi',
+                        'laporan_pencapaian'
             ];
 
 $page_title = ucfirst(str_replace('_', ' ', $page));

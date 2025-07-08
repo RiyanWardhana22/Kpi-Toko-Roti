@@ -31,7 +31,7 @@
                                                 <div class="card-body">
                                                             <h5 class="card-title">Laporan Pencapaian Target Produksi</h5>
                                                             <p class="card-text">Visualisasikan perbandingan antara target produksi dengan hasil aktual untuk setiap produk.</p>
-                                                            <a href="#" class="btn btn-secondary disabled">Segera Hadir</a>
+                                                            <a href="<?php echo base_url('index.php?page=laporan_pencapaian'); ?>" class="btn btn-primary">Lihat Laporan</a>
                                                 </div>
                                     </div>
                         </div>
