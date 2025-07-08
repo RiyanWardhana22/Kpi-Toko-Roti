@@ -13,7 +13,9 @@ $allowed_pages =
                         'bahan_baku_form',
                         'bahan_baku_hapus',
                         'resep',
-                        'resep_hapus'
+                        'resep_hapus',
+                        'produksi',
+                        'produksi_rencana_form'
             ];
 
 $page_title = ucfirst(str_replace('_', ' ', $page));

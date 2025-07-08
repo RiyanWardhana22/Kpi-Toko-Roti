@@ -45,7 +45,7 @@ require_once __DIR__ . '/../core/functions.php';
                                                 <a class="nav-link text-white" href="<?php echo base_url('index.php?page=dashboard'); ?>">Dashboard Utama</a>
                                     </li>
                                     <li class="nav-item">
-                                                <a class="nav-link text-white" href="#">Manajemen Produksi</a>
+                                                <a class="nav-link text-white" href="<?php echo base_url('index.php?page=produksi'); ?>">Manajemen Produksi</a>
                                     </li>
                                     <li class="nav-item">
                                                 <a class="nav-link text-white" href="#">Laporan & Analisis</a>
