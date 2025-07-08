@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                             <input type="text" class="form-control" id="satuan" name="satuan" value="<?php echo htmlspecialchars($satuan); ?>" required>
                                                 </div>
                                                 <div class="mb-3">
-                                                            <label for="harga_beli" class="form-label">Harga Beli (Opsional)</label>
+                                                            <label for="harga_beli" class="form-label">Harga Beli</label>
                                                             <input type="number" step="0.01" class="form-control" id="harga_beli" name="harga_beli" value="<?php echo htmlspecialchars($harga_beli); ?>">
                                                 </div>
 

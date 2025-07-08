@@ -21,7 +21,7 @@
                                                 <div class="card-body">
                                                             <h5 class="card-title">Laporan Efisiensi Bahan Baku</h5>
                                                             <p class="card-text">Bandingkan penggunaan bahan baku standar dengan penggunaan aktual untuk mengukur efisiensi.</p>
-                                                            <a href="#" class="btn btn-secondary disabled">Segera Hadir</a>
+                                                            <a href="<?php echo base_url('index.php?page=laporan_efisiensi'); ?>" class="btn btn-primary">Lihat Laporan</a>
                                                 </div>
                                     </div>
                         </div>
