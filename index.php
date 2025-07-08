@@ -3,7 +3,7 @@ require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/core/functions.php';
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
-$allowed_pages = ['dashboard', 'produk', 'bahan_baku'];
+$allowed_pages = ['dashboard', 'produk', 'produk_form', 'produk_hapus', 'bahan_baku'];
 
 $page_title = ucfirst(str_replace('_', ' ', $page));
 include __DIR__ . '/templates/header.php';
