@@ -15,7 +15,8 @@ $allowed_pages =
                         'resep',
                         'resep_hapus',
                         'produksi',
-                        'produksi_rencana_form'
+                        'produksi_rencana_form',
+                        'produksi_input_form'
             ];
 
 $page_title = ucfirst(str_replace('_', ' ', $page));
