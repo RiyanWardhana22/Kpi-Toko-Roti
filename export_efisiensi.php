@@ -7,6 +7,12 @@ if (!isset($_SESSION['id_pengguna'])) {
 }
 
 require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 $tanggal_akhir = isset($_GET['akhir']) ? $_GET['akhir'] : date('Y-m-d');
 $tanggal_awal = isset($_GET['awal']) ? $_GET['awal'] : date('Y-m-d', strtotime('-6 days', strtotime($tanggal_akhir)));
@@ -33,31 +39,45 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $laporan_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$filename = "laporan_efisiensi_" . date('Y-m-d') . ".csv";
-header('Content-Type: text/csv');
-header('Content-Disposition: attachment; filename="' . $filename . '"');
+$spreadsheet = new Spreadsheet();
+$sheet = $spreadsheet->getActiveSheet();
+$sheet->setTitle('Laporan Efisiensi');
 
-$output = fopen('php://output', 'w');
+$headers = ['Nama Produk', 'Bahan Baku', 'Penggunaan Standar', 'Penggunaan Aktual', 'Selisih (Variance)', 'Efisiensi (%)'];
+$sheet->fromArray($headers, null, 'A1');
 
-fputcsv($output, ['Nama Produk', 'Bahan Baku', 'Penggunaan Standar', 'Penggunaan Aktual', 'Selisih (Variance)', 'Efisiensi (%)', 'Satuan']);
-
+$rowIndex = 2;
 foreach ($laporan_data as $data) {
             $standar = $data['total_standar'];
             $aktual = $data['total_aktual'];
             $selisih = $aktual - $standar;
             $efisiensi = ($standar > 0 && $aktual > 0) ? ($standar / $aktual) * 100 : 0;
 
-            $row = [
-                        $data['nama_produk'],
-                        $data['nama_bahan'],
-                        number_format($standar),
-                        number_format($aktual),
-                        number_format($selisih),
-                        number_format($efisiensi) . '%',
-                        $data['satuan']
-            ];
-            fputcsv($output, $row);
+            $sheet->setCellValue('A' . $rowIndex, $data['nama_produk']);
+            $sheet->setCellValue('B' . $rowIndex, $data['nama_bahan']);
+            $sheet->setCellValue('C' . $rowIndex, number_format($standar) . ' ' . $data['satuan']);
+            $sheet->setCellValue('D' . $rowIndex, number_format($aktual) . ' ' . $data['satuan']);
+            $sheet->setCellValue('E' . $rowIndex, number_format($selisih) . ' ' . $data['satuan']);
+
+            $sheet->setCellValue('F' . $rowIndex, number_format($efisiensi) . '%');
+            $rowIndex++;
 }
 
-fclose($output);
+$lastRow = $rowIndex - 1;
+$sheet->getStyle("A1:F1")->getFont()->setBold(true);
+$sheet->getStyle("A1:F$lastRow")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+$sheet->getStyle("A1:F$lastRow")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+$sheet->getStyle("A1:F$lastRow")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+foreach (range('A', 'F') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+}
+
+$filename = "laporan_efisiensi_" . date('Y-m-d') . ".xlsx";
+header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+header('Content-Disposition: attachment;filename="' . $filename . '"');
+header('Cache-Control: max-age=0');
+
+$writer = new Xlsx($spreadsheet);
+$writer->save('php://output');
 exit();
