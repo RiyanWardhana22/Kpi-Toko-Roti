@@ -75,9 +75,9 @@ foreach ($dateRange as $date) {
             <form method="GET">
                 <input type="hidden" name="page" value="dashboard">
                 <div class="row align-items-end">
-                    <div class="col-md-5"><label for="awal">Tanggal Awal</label><input type="date" name="awal" id="awal" class="form-control" value="<?php echo $tanggal_awal; ?>"></div>
-                    <div class="col-md-5"><label for="akhir">Tanggal Akhir</label><input type="date" name="akhir" id="akhir" class="form-control" value="<?php echo $tanggal_akhir; ?>"></div>
-                    <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Terapkan</button></div>
+                    <div class="col-lg-5 col-md-12 mb-2 mb-lg-0"><label for="awal">Tanggal Awal</label><input type="date" name="awal" id="awal" class="form-control" value="<?php echo $tanggal_awal; ?>"></div>
+                    <div class="col-lg-5 col-md-12 mb-2 mb-lg-0"><label for="akhir">Tanggal Akhir</label><input type="date" name="akhir" id="akhir" class="form-control" value="<?php echo $tanggal_akhir; ?>"></div>
+                    <div class="col-lg-2 col-md-12"><button type="submit" class="btn btn-primary w-100">Terapkan</button></div>
                 </div>
             </form>
         </div>
