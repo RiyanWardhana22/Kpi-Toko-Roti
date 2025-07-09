@@ -83,9 +83,11 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                                                                 <td colspan="5" class="text-center">Tidak ada pengguna yang cocok dengan kriteria.</td>
                                                                                     </tr>
                                                                         <?php else: ?>
-                                                                                    <?php foreach ($users as $user): ?>
+                                                                                    <?php
+                                                                                    $no = 1;
+                                                                                    foreach ($users as $user): ?>
                                                                                                 <tr>
-                                                                                                            <td><?php echo $user['id_pengguna']; ?></td>
+                                                                                                            <td><?php echo $no++ ?></td>
                                                                                                             <td><?php echo htmlspecialchars($user['nama_lengkap']); ?></td>
                                                                                                             <td><?php echo htmlspecialchars($user['username']); ?></td>
                                                                                                             <td><span class="badge bg-info text-dark"><?php echo $user['role']; ?></span></td>
