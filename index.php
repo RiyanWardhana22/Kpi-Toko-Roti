@@ -1,4 +1,5 @@
 <?php
+ob_start();
 
 if (session_status() == PHP_SESSION_NONE) {
             session_start();
@@ -11,6 +12,8 @@ if (!isset($_SESSION['id_pengguna'])) {
 
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/core/functions.php';
+
+$settings = load_settings($pdo);
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 $allowed_pages =
@@ -33,7 +36,8 @@ $allowed_pages =
                         'laporan_pencapaian',
                         'pengguna',
                         'pengguna_form',
-                        'pengguna_hapus'
+                        'pengguna_hapus',
+                        'settings'
             ];
 
 $page_title = ucfirst(str_replace('_', ' ', $page));
@@ -46,3 +50,5 @@ if (in_array($page, $allowed_pages) && file_exists(__DIR__ . '/pages/' . $page .
 }
 
 include __DIR__ . '/templates/footer.php';
+
+ob_end_flush();

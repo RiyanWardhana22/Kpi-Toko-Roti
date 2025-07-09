@@ -1,5 +1,4 @@
 <?php
-// templates/header.php
 if (session_status() == PHP_SESSION_NONE) {
             session_start();
 }
@@ -11,15 +10,14 @@ require_once __DIR__ . '/../core/functions.php';
 <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title><?php echo isset($page_title) ? $page_title . ' - Dashboard KPI' : 'Dashboard KPI Toko Roti'; ?></title>
+            <title><?php echo isset($page_title) ? $page_title . ' - ' . htmlspecialchars($settings['nama_website']) : htmlspecialchars($settings['nama_website']); ?></title>
+            <link rel="icon" href="<?php echo base_url('assets/images/' . htmlspecialchars($settings['favicon'])); ?>">
             <link href="<?php echo base_url('assets/css/bootstrap.min.css'); ?>" rel="stylesheet">
             <style>
-                        /* CSS untuk Layout Baru */
                         body {
                                     background-color: #f8f9fa;
                         }
 
-                        /* 1. Sidebar Styling */
                         .sidebar {
                                     width: 250px;
                                     /* Lebar sidebar */
@@ -87,7 +85,7 @@ require_once __DIR__ . '/../core/functions.php';
 <body>
 
             <div class="sidebar">
-                        <h4 class="text-center text-white mb-4">Dashboard Roti</h4>
+                        <h4 class="text-center text-white mb-4"><?php echo htmlspecialchars($settings['nama_website']); ?></h4>
                         <ul class="nav flex-column">
                                     <li class="nav-item">
                                                 <a class="nav-link" href="<?php echo base_url('index.php?page=dashboard'); ?>">Dashboard Utama</a>
@@ -98,16 +96,24 @@ require_once __DIR__ . '/../core/functions.php';
                                     <li class="nav-item">
                                                 <a class="nav-link" href="<?php echo base_url('index.php?page=laporan'); ?>">Laporan & Analisis</a>
                                     </li>
+                                    <li class="nav-item dropdown">
+                                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            Data Master
+                                                </a>
+                                                <ul class="dropdown-menu">
+                                                            <li><a class="dropdown-item" href="<?php echo base_url('index.php?page=produk'); ?>">Data Produk</a></li>
+                                                            <li><a class="dropdown-item" href="<?php echo base_url('index.php?page=bahan_baku'); ?>">Data Bahan Baku</a></li>
+                                                </ul>
+                                    </li>
 
                                     <?php if ($_SESSION['role'] === 'Admin'): ?>
                                                 <li class="nav-item dropdown">
                                                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                                        Data Master
+                                                                        Settings
                                                             </a>
                                                             <ul class="dropdown-menu">
-                                                                        <li><a class="dropdown-item" href="<?php echo base_url('index.php?page=produk'); ?>">Data Produk</a></li>
-                                                                        <li><a class="dropdown-item" href="<?php echo base_url('index.php?page=bahan_baku'); ?>">Data Bahan Baku</a></li>
                                                                         <li><a class="dropdown-item" href="<?php echo base_url('index.php?page=pengguna'); ?>">Data Staf</a></li>
+                                                                        <li><a class="dropdown-item" href="<?php echo base_url('index.php?page=settings'); ?>">Pengaturan Web</a></li>
                                                             </ul>
                                                 </li>
                                     <?php endif; ?>

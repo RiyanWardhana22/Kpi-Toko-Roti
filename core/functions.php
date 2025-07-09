@@ -18,3 +18,14 @@ function redirect($url)
             header("Location: " . $url);
             exit();
 }
+
+function load_settings($pdo)
+{
+            try {
+                        $stmt = $pdo->query("SELECT nama_pengaturan, nilai_pengaturan FROM pengaturan");
+                        $settings_from_db = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+                        return $settings_from_db;
+            } catch (PDOException $e) {
+                        return [];
+            }
+}
