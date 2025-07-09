@@ -64,8 +64,18 @@ $laporan_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
     <div class="card shadow mb-4">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-primary">Hasil Analisis Efisiensi</h6>
+            <?php
+            $export_query_string = http_build_query([
+                'awal' => $tanggal_awal,
+                'akhir' => $tanggal_akhir,
+                'produk' => $filter_produk
+            ]);
+            ?>
+            <a href="export_efisiensi.php?<?php echo $export_query_string; ?>" class="btn btn-success btn-sm">
+                <i class="fas fa-file-excel"></i> Export ke Excel
+            </a>
         </div>
         <div class="card-body">
             <div class="table-responsive">
