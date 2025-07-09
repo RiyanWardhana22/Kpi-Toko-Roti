@@ -30,7 +30,10 @@ $allowed_pages =
                         'laporan',
                         'laporan_waste',
                         'laporan_efisiensi',
-                        'laporan_pencapaian'
+                        'laporan_pencapaian',
+                        'pengguna',
+                        'pengguna_form',
+                        'pengguna_hapus'
             ];
 
 $page_title = ucfirst(str_replace('_', ' ', $page));

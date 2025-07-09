@@ -65,8 +65,7 @@ require_once __DIR__ . '/../core/functions.php';
                                                             <ul class="dropdown-menu">
                                                                         <li><a class="dropdown-item" href="<?php echo base_url('index.php?page=produk'); ?>">Data Produk</a></li>
                                                                         <li><a class="dropdown-item" href="<?php echo base_url('index.php?page=bahan_baku'); ?>">Data Bahan Baku</a></li>
-                                                                        <li><a class="dropdown-item" href="#">Data Staf</a></li> <?php // Nanti akan kita buat 
-                                                                                                                                    ?>
+                                                                        <li><a class="dropdown-item" href="<?php echo base_url('index.php?page=pengguna'); ?>">Data Staf</a></li>
                                                             </ul>
                                                 </li>
                                     <?php endif; ?>
