@@ -1,15 +1,8 @@
 <?php
-$tanggal_filter = isset($_GET['tanggal']) ? $_GET['tanggal'] : date('Y-m-d');
 
+$tanggal_filter = isset($_GET['tanggal']) ? $_GET['tanggal'] : date('Y-m-d');
 try {
-    $stmt = $pdo->prepare("
-        SELECT pr.id_rencana, p.nama_produk, pr.target_produksi, pl.id_log
-        FROM produksi_rencana pr
-        JOIN produk p ON pr.id_produk = p.id_produk
-        LEFT JOIN produksi_log pl ON pr.id_rencana = pl.id_rencana
-        WHERE pr.tanggal_produksi = ?
-        ORDER BY p.nama_produk ASC
-    ");
+    $stmt = $pdo->prepare("SELECT pr.id_rencana, p.nama_produk, pr.target_produksi, pl.id_log FROM produksi_rencana pr JOIN produk p ON pr.id_produk = p.id_produk LEFT JOIN produksi_log pl ON pr.id_rencana = pl.id_rencana WHERE pr.tanggal_produksi = ? ORDER BY p.nama_produk ASC");
     $stmt->execute([$tanggal_filter]);
     $rencana_produksi = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -18,8 +11,7 @@ try {
 }
 ?>
 
-<div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800">Manajemen Produksi</h1>
+<div class="container-fluid py-3">
 
     <?php if (isset($_GET['status'])): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -31,26 +23,23 @@ try {
         </div>
     <?php endif; ?>
 
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-            <h6 class="m-0 font-weight-bold text-primary">Rencana Produksi untuk Tanggal: <?php echo htmlspecialchars($tanggal_filter); ?></h6>
-            <a href="<?php echo base_url('index.php?page=produksi_rencana_form'); ?>" class="btn btn-primary btn-sm">Tambah Rencana</a>
+    <div class="card">
+        <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
+            <h6 class="m-0">Rencana Produksi</h6>
+            <div class="d-flex flex-wrap align-items-center">
+                <form method="GET" class="d-flex me-2">
+                    <input type="hidden" name="page" value="produksi">
+                    <input type="date" name="tanggal" class="form-control form-control-sm" value="<?php echo htmlspecialchars($tanggal_filter); ?>">
+                    <button type="submit" class="btn btn-sm btn-info ms-2">Filter</button>
+                </form>
+                <a href="<?php echo base_url('index.php?page=produksi_rencana_form'); ?>" class="btn btn-primary btn-sm">
+                    + Tambah Rencana
+                </a>
+            </div>
         </div>
         <div class="card-body">
-            <form method="GET" class="mb-4">
-                <input type="hidden" name="page" value="produksi">
-                <div class="row">
-                    <div class="col-md-3">
-                        <input type="date" name="tanggal" class="form-control" value="<?php echo htmlspecialchars($tanggal_filter); ?>">
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-info">Filter</button>
-                    </div>
-                </div>
-            </form>
-
             <div class="table-responsive">
-                <table class="table table-bordered" width="100%" cellspacing="0">
+                <table class="table-modern">
                     <thead>
                         <tr>
                             <th>Nama Produk</th>
@@ -62,13 +51,17 @@ try {
                     <tbody>
                         <?php if (empty($rencana_produksi)): ?>
                             <tr>
-                                <td colspan="4" class="text-center">Belum ada rencana produksi untuk tanggal ini.</td>
+                                <td colspan="4" class="text-center bg-light">Belum ada rencana produksi untuk tanggal ini.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($rencana_produksi as $rencana): ?>
                                 <tr>
-                                    <td><?php echo htmlspecialchars($rencana['nama_produk']); ?></td>
-                                    <td><?php echo htmlspecialchars($rencana['target_produksi']); ?></td>
+                                    <td>
+                                        <div class="fw-bold"><?php echo htmlspecialchars($rencana['nama_produk']); ?></div>
+                                    </td>
+                                    <td>
+                                        <?php echo htmlspecialchars($rencana['target_produksi']); ?> Pcs
+                                    </td>
                                     <td>
                                         <?php if ($rencana['id_log']): ?>
                                             <span class="badge bg-success">Sudah Diinput</span>
