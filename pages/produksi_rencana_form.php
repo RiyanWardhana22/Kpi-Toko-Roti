@@ -27,19 +27,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<div class="container-fluid">
-            <h1 class="h3 mb-4 text-gray-800">Input Rencana Produksi Harian</h1>
-
+<div class="container-fluid py-3">
             <?php if (isset($error)): ?>
                         <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
             <?php endif; ?>
 
-            <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Form Rencana Produksi</h6>
-                        </div>
-                        <div class="card-body">
-                                    <form method="POST">
+            <form method="POST">
+                        <div class="card">
+                                    <div class="card-header">
+                                                <h6 class="m-0">Form Rencana Produksi</h6>
+                                    </div>
+                                    <div class="card-body">
                                                 <div class="mb-3">
                                                             <label for="tanggal_produksi" class="form-label">Tanggal Produksi</label>
                                                             <input type="date" class="form-control" id="tanggal_produksi" name="tanggal_produksi" value="<?php echo date('Y-m-d'); ?>" required>
@@ -57,10 +55,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                             <label for="target_produksi" class="form-label">Target Produksi (Jumlah)</label>
                                                             <input type="number" class="form-control" id="target_produksi" name="target_produksi" placeholder="Contoh: 100" required>
                                                 </div>
-
+                                    </div>
+                                    <div class="card-footer text-end">
                                                 <a href="<?php echo base_url('index.php?page=produksi'); ?>" class="btn btn-secondary">Batal</a>
                                                 <button type="submit" class="btn btn-primary">Simpan Rencana</button>
-                                    </form>
+                                    </div>
                         </div>
-            </div>
+            </form>
 </div>
