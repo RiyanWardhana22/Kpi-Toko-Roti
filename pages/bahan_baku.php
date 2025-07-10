@@ -41,7 +41,7 @@ $nomor = ($page - 1) * $limit + 1;
 <div class="container-fluid py-3">
             <div class="card">
                         <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
-                                    <h6 class="m-0">Daftar Bahan Baku</h6>
+                                    <h6 class="m-0">Daftar Bahan Baku (Total: <?php echo $total_records ?>)</h6>
                                     <div class="d-flex flex-wrap align-items-center">
                                                 <form method="GET" class="d-flex me-2">
                                                             <input type="hidden" name="page" value="bahan_baku">
