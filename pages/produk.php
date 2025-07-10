@@ -48,7 +48,7 @@ $nomor = ($page - 1) * $limit + 1;
                                                             <input type="text" name="q" class="form-control form-control-sm" placeholder="Cari produk..." value="<?php echo htmlspecialchars($search_term); ?>">
                                                             <button type="submit" class="btn btn-sm btn-info ms-2">Cari</button>
                                                 </form>
-                                                <a href="<?php echo base_url('index.php?page=produk_form'); ?>" class="btn btn-primary btn-sm">+ Tambah Produk</a>
+                                                <a href="<?php echo base_url('index.php?page=produk_form'); ?>" class="btn btn-outline-primary btn-sm">+ Tambah</a>
                                     </div>
                         </div>
                         <div class="card-body">
@@ -58,7 +58,7 @@ $nomor = ($page - 1) * $limit + 1;
                                                                         <tr>
                                                                                     <th style="width: 5%;">No</th>
                                                                                     <th>Nama Produk</th>
-                                                                                    <th style="width: 25%;">Aksi</th>
+                                                                                    <th class="text-center" style="width: 25%;">Aksi</th>
                                                                         </tr>
                                                             </thead>
                                                             <tbody>
@@ -73,10 +73,10 @@ $nomor = ($page - 1) * $limit + 1;
                                                                                                             <td>
                                                                                                                         <div class="fw-bold"><?php echo htmlspecialchars($produk['nama_produk']); ?></div>
                                                                                                             </td>
-                                                                                                            <td>
-                                                                                                                        <a href="<?php echo base_url('index.php?page=resep&id_produk=' . $produk['id_produk']); ?>" class="btn btn-info btn-sm">Resep</a>
-                                                                                                                        <a href="<?php echo base_url('index.php?page=produk_form&id=' . $produk['id_produk']); ?>" class="btn btn-warning btn-sm">Edit</a>
-                                                                                                                        <a href="<?php echo base_url('index.php?page=produk_hapus&id=' . $produk['id_produk']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Anda yakin?');">Hapus</a>
+                                                                                                            <td class="d-flex justify-content-center gap-2">
+                                                                                                                        <a href="<?php echo base_url('index.php?page=resep&id_produk=' . $produk['id_produk']); ?>" class="btn btn-outline-info btn-sm">Resep</a>
+                                                                                                                        <a href="<?php echo base_url('index.php?page=produk_form&id=' . $produk['id_produk']); ?>" class="btn btn-outline-warning btn-sm"><i class="fa-solid fa-pencil"></i></a>
+                                                                                                                        <a href="<?php echo base_url('index.php?page=produk_hapus&id=' . $produk['id_produk']); ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Anda yakin?');"><i class="fa-solid fa-trash"></i></a>
                                                                                                             </td>
                                                                                                 </tr>
                                                                                     <?php endforeach; ?>
