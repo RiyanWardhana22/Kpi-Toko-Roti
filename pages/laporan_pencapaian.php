@@ -1,6 +1,4 @@
 <?php
-// File: pages/laporan_pencapaian.php (Versi Redesain)
-
 $tanggal_akhir = isset($_GET['akhir']) ? $_GET['akhir'] : date('Y-m-d');
 $tanggal_awal = isset($_GET['awal']) ? $_GET['awal'] : date('Y-m-d', strtotime('-6 days', strtotime($tanggal_akhir)));
 

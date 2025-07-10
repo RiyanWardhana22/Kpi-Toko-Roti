@@ -2,7 +2,13 @@
 if (session_status() == PHP_SESSION_NONE) {
             session_start();
 }
+
 $current_page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
+$data_master_pages = ['produk', 'produk_form', 'bahan_baku', 'bahan_baku_form', 'resep'];
+$settings_pages = ['pengguna', 'pengguna_form', 'settings'];
+
+$is_data_master_active = in_array($current_page, $data_master_pages);
+$is_settings_active = in_array($current_page, $settings_pages);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -12,8 +18,8 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title><?php echo isset($page_title) ? $page_title . ' - ' . htmlspecialchars($settings['judul_default']) : htmlspecialchars($settings['judul_default']); ?></title>
             <link rel="icon" href="<?php echo base_url('assets/images/' . htmlspecialchars($settings['favicon'])); ?>">
-            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
             <link href="<?php echo base_url('assets/css/bootstrap.min.css'); ?>" rel="stylesheet">
             <link href="<?php echo base_url('assets/css/style.css'); ?>" rel="stylesheet">
 </head>
@@ -55,34 +61,35 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
                                                             Laporan & Analisis
                                                 </a>
                                     </li>
-                                    <?php if ($_SESSION['role'] === 'Admin'): ?>
+
+                                    <?php if ($_SESSION['role'] === 'Admin') : ?>
                                                 <li class="nav-item">
-                                                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#dataMasterSubmenu">
+                                                            <a class="nav-link text-start dropdown-toggle <?php echo $is_data_master_active ? 'active' : ''; ?>" href="#dataMasterSubmenu" role="button" data-bs-toggle="collapse" aria-expanded="<?php echo $is_data_master_active ? 'true' : 'false'; ?>">
                                                                         <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                                                     <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34" />
                                                                                     <polygon points="18 2 22 6 12 16 8 16 8 12 18 2" />
                                                                         </svg>
                                                                         Data Master
                                                             </a>
-                                                            <div class="collapse" id="dataMasterSubmenu">
+                                                            <div class="collapse submenu <?php echo $is_data_master_active ? 'show' : ''; ?>" id="dataMasterSubmenu">
                                                                         <ul class="nav flex-column">
-                                                                                    <li><a class="dropdown-item" href="<?php echo base_url('index.php?page=produk'); ?>">Data Produk</a></li>
-                                                                                    <li><a class="dropdown-item" href="<?php echo base_url('index.php?page=bahan_baku'); ?>">Data Bahan Baku</a></li>
+                                                                                    <li><a class="dropdown-item <?php echo in_array($current_page, ['produk', 'produk_form', 'resep']) ? 'active' : ''; ?>" href="<?php echo base_url('index.php?page=produk'); ?>">Data Produk</a></li>
+                                                                                    <li><a class="dropdown-item <?php echo in_array($current_page, ['bahan_baku', 'bahan_baku_form']) ? 'active' : ''; ?>" href="<?php echo base_url('index.php?page=bahan_baku'); ?>">Data Bahan Baku</a></li>
                                                                         </ul>
                                                             </div>
                                                 </li>
                                                 <li class="nav-item">
-                                                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#settingsSubmenu">
+                                                            <a class="nav-link dropdown-toggle <?php echo $is_settings_active ? 'active' : ''; ?>" href="#settingsSubmenu" role="button" data-bs-toggle="collapse" aria-expanded="<?php echo $is_settings_active ? 'true' : 'false'; ?>">
                                                                         <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                                                     <circle cx="12" cy="12" r="3" />
                                                                                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
                                                                         </svg>
                                                                         Settings
                                                             </a>
-                                                            <div class="collapse" id="settingsSubmenu">
+                                                            <div class="collapse submenu <?php echo $is_settings_active ? 'show' : ''; ?>" id="settingsSubmenu">
                                                                         <ul class="nav flex-column">
-                                                                                    <li><a class="dropdown-item" href="<?php echo base_url('index.php?page=pengguna'); ?>">Data Staf</a></li>
-                                                                                    <li><a class="dropdown-item" href="<?php echo base_url('index.php?page=settings'); ?>">Pengaturan Web</a></li>
+                                                                                    <li><a class="dropdown-item <?php echo in_array($current_page, ['pengguna', 'pengguna_form']) ? 'active' : ''; ?>" href="<?php echo base_url('index.php?page=pengguna'); ?>">Data Staf</a></li>
+                                                                                    <li><a class="dropdown-item <?php echo $current_page == 'settings' ? 'active' : ''; ?>" href="<?php echo base_url('index.php?page=settings'); ?>">Pengaturan Web</a></li>
                                                                         </ul>
                                                             </div>
                                                 </li>
@@ -103,7 +110,6 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
                                                                         <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
                                                             </svg>
                                                 </button>
-                                                <h1 class="page-title ms-3 mb-0"></h1>
                                     </div>
                                     <div class="d-flex align-items-center">
                                                 <div class="text-end me-3">
