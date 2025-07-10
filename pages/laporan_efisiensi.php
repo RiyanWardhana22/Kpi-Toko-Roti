@@ -86,6 +86,16 @@ $laporan_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </tbody>
                 </table>
             </div>
+            <div class="mt-3">
+                <small class="text-muted">
+                    <strong>Keterangan:</strong>
+                    <ul>
+                        <li><strong>Penggunaan Standar:</strong> Kebutuhan bahan sesuai resep dikalikan jumlah produk sukses.</li>
+                        <li><strong>Selisih (Variance):</strong> `Aktual - Standar`. Nilai positif (merah) berarti pemborosan. Nilai negatif (hijau) berarti penghematan.</li>
+                        <li><strong>Efisiensi:</strong> `(Standar / Aktual) * 100%`. Nilai di atas 100% berarti hemat, di bawah 100% berarti boros.</li>
+                    </ul>
+                </small>
+            </div>
         </div>
     </div>
 </div>
