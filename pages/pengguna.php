@@ -25,75 +25,80 @@ if (!empty($search_term)) {
             $data_sql .= " WHERE nama_lengkap LIKE ? OR username LIKE ?";
 }
 $data_sql .= " ORDER BY id_pengguna ASC LIMIT ? OFFSET ?";
-
 $params[] = $limit;
 $params[] = $offset;
 
 $stmt = $pdo->prepare($data_sql);
-$stmt->bindValue(count($params) - 1, $limit, PDO::PARAM_INT);
-$stmt->bindValue(count($params), $offset, PDO::PARAM_INT);
-
 if (!empty($search_term)) {
             $stmt->bindValue(1, "%$search_term%");
             $stmt->bindValue(2, "%$search_term%");
 }
+$stmt->bindValue(count($params) - 1, $limit, PDO::PARAM_INT);
+$stmt->bindValue(count($params), $offset, PDO::PARAM_INT);
 $stmt->execute();
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+$nomor = ($page - 1) * $limit + 1;
 ?>
 
-<div class="container-fluid">
-            <h1 class="h3 mb-2 text-gray-800">Manajemen Pengguna</h1>
-            <p class="mb-4">Cari, lihat, dan kelola akun pengguna yang terdaftar di sistem.</p>
-
+<div class="container-fluid py-3">
             <?php if (isset($_GET['status_hapus'])): ?>
-                        <div class="alert alert-<?php echo $_GET['status_hapus'] == 'sukses' ? 'success' : 'danger'; ?>">
+                        <div class="alert alert-<?php echo $_GET['status_hapus'] == 'sukses' ? 'success' : 'danger'; ?> alert-dismissible fade show" role="alert">
                                     <?php echo $_GET['status_hapus'] == 'sukses' ? 'Pengguna berhasil dihapus!' : 'Gagal menghapus pengguna (Anda tidak bisa menghapus akun sendiri).'; ?>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
             <?php endif; ?>
 
-            <div class="d-flex justify-content-between mb-3">
-                        <a href="<?php echo base_url('index.php?page=pengguna_form'); ?>" class="btn btn-primary">Tambah Pengguna</a>
-                        <form action="" method="GET" class="d-flex">
-                                    <input type="hidden" name="page" value="pengguna">
-                                    <input type="text" name="q" class="form-control" placeholder="Cari nama atau username..." value="<?php echo htmlspecialchars($search_term); ?>">
-                                    <button type="submit" class="btn btn-info ms-2">Cari</button>
-                        </form>
-            </div>
-
-            <div class="card shadow mb-4">
-                        <div class="card-header">
-                                    <h6 class="m-0 font-weight-bold text-primary">Daftar Pengguna</h6>
+            <div class="card">
+                        <div class="card-header d-flex flex-wrap align-items-center justify-content-between">
+                                    <h6 class="m-0">Daftar Pengguna (Total: <?php echo $total_records; ?>)</h6>
+                                    <div class="d-flex flex-wrap align-items-center">
+                                                <form method="GET" class="d-flex me-2">
+                                                            <input type="hidden" name="page" value="pengguna">
+                                                            <input type="text" name="q" class="form-control form-control-sm" placeholder="Cari pengguna..." value="<?php echo htmlspecialchars($search_term); ?>">
+                                                            <button type="submit" class="btn btn-sm btn-info ms-2">Cari</button>
+                                                </form>
+                                                <a href="<?php echo base_url('index.php?page=pengguna_form'); ?>" class="btn btn-outline-primary btn-sm">+ Tambah</a>
+                                    </div>
                         </div>
                         <div class="card-body">
                                     <div class="table-responsive">
-                                                <table class="table table-bordered">
+                                                <table class="table-modern">
                                                             <thead>
                                                                         <tr>
-                                                                                    <th>ID</th>
+                                                                                    <th style="width: 5%;">No</th>
                                                                                     <th>Nama Lengkap</th>
                                                                                     <th>Username</th>
-                                                                                    <th>Role</th>
-                                                                                    <th>Aksi</th>
+                                                                                    <th class="text-center">Role</th>
+                                                                                    <th class="text-center" style="width: 15%;">Aksi</th>
                                                                         </tr>
                                                             </thead>
                                                             <tbody>
                                                                         <?php if (empty($users)): ?>
                                                                                     <tr>
-                                                                                                <td colspan="5" class="text-center">Tidak ada pengguna yang cocok dengan kriteria.</td>
+                                                                                                <td colspan="5" class="text-center bg-light p-5">Tidak ada pengguna yang cocok dengan kriteria.</td>
                                                                                     </tr>
                                                                         <?php else: ?>
-                                                                                    <?php
-                                                                                    $no = 1;
-                                                                                    foreach ($users as $user): ?>
+                                                                                    <?php foreach ($users as $user): ?>
                                                                                                 <tr>
-                                                                                                            <td><?php echo $no++ ?></td>
-                                                                                                            <td><?php echo htmlspecialchars($user['nama_lengkap']); ?></td>
-                                                                                                            <td><?php echo htmlspecialchars($user['username']); ?></td>
-                                                                                                            <td><span class="badge bg-info text-dark"><?php echo $user['role']; ?></span></td>
+                                                                                                            <td><?php echo $nomor++; ?></td>
                                                                                                             <td>
-                                                                                                                        <a href="<?php echo base_url('index.php?page=pengguna_form&id=' . $user['id_pengguna']); ?>" class="btn btn-warning btn-sm">Edit</a>
-                                                                                                                        <a href="<?php echo base_url('index.php?page=pengguna_hapus&id=' . $user['id_pengguna']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Anda yakin?');">Hapus</a>
+                                                                                                                        <div class="fw-bold"><?php echo htmlspecialchars($user['nama_lengkap']); ?></div>
+                                                                                                            </td>
+                                                                                                            <td><?php echo htmlspecialchars($user['username']); ?></td>
+                                                                                                            <td class="text-center">
+                                                                                                                        <?php
+                                                                                                                        if ($user['role'] == 'Admin') {
+                                                                                                                                    $badge_class = 'bg-primary';
+                                                                                                                        } else {
+                                                                                                                                    $badge_class = 'bg-secondary';
+                                                                                                                        }
+                                                                                                                        ?>
+                                                                                                                        <span class="badge <?php echo $badge_class; ?>"><?php echo $user['role']; ?></span>
+                                                                                                            </td>
+                                                                                                            <td class="d-flex justify-content-center gap-2">
+                                                                                                                        <a href="<?php echo base_url('index.php?page=pengguna_form&id=' . $user['id_pengguna']); ?>" class="btn btn-outline-warning btn-sm"><i class="fa-solid fa-pencil"></i></a>
+                                                                                                                        <a href="<?php echo base_url('index.php?page=pengguna_hapus&id=' . $user['id_pengguna']); ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Anda yakin?');"><i class="fa-solid fa-trash"></i></a>
                                                                                                             </td>
                                                                                                 </tr>
                                                                                     <?php endforeach; ?>
@@ -103,21 +108,13 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     </div>
 
                                     <?php if ($total_pages > 1): ?>
-                                                <nav>
+                                                <nav class="mt-4">
                                                             <ul class="pagination justify-content-end">
-                                                                        <li class="page-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>">
-                                                                                    <a class="page-link" href="?page=pengguna&p=<?php echo $page - 1; ?>&q=<?php echo urlencode($search_term); ?>">Previous</a>
-                                                                        </li>
-
+                                                                        <li class="page-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>"><a class="page-link" href="?page=pengguna&p=<?php echo $page - 1; ?>&q=<?php echo urlencode($search_term); ?>">Previous</a></li>
                                                                         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                                                                                    <li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>">
-                                                                                                <a class="page-link" href="?page=pengguna&p=<?php echo $i; ?>&q=<?php echo urlencode($search_term); ?>"><?php echo $i; ?></a>
-                                                                                    </li>
+                                                                                    <li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>"><a class="page-link" href="?page=pengguna&p=<?php echo $i; ?>&q=<?php echo urlencode($search_term); ?>"><?php echo $i; ?></a></li>
                                                                         <?php endfor; ?>
-
-                                                                        <li class="page-item <?php echo ($page >= $total_pages) ? 'disabled' : ''; ?>">
-                                                                                    <a class="page-link" href="?page=pengguna&p=<?php echo $page + 1; ?>&q=<?php echo urlencode($search_term); ?>">Next</a>
-                                                                        </li>
+                                                                        <li class="page-item <?php echo ($page >= $total_pages) ? 'disabled' : ''; ?>"><a class="page-link" href="?page=pengguna&p=<?php echo $page + 1; ?>&q=<?php echo urlencode($search_term); ?>">Next</a></li>
                                                             </ul>
                                                 </nav>
                                     <?php endif; ?>

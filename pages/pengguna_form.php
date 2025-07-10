@@ -18,7 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $_POST['username'];
             $pass = $_POST['password'];
             $role = $_POST['role'];
-
             try {
                         if ($is_edit) {
                                     if (!empty($pass)) {
@@ -40,31 +39,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 }
 ?>
-<div class="container-fluid">
-            <h1 class="h3 mb-4 text-gray-800"><?php echo $is_edit ? 'Edit Pengguna' : 'Tambah Pengguna Baru'; ?></h1>
-
+<div class="container-fluid py-3">
             <?php if (isset($error)): ?><div class="alert alert-danger"><?php echo $error; ?></div><?php endif; ?>
 
-            <div class="card shadow">
-                        <div class="card-body">
-                                    <form method="POST">
-                                                <div class="mb-3"><label>Nama Lengkap</label><input type="text" name="nama_lengkap" class="form-control" value="<?php echo htmlspecialchars($user_data['nama_lengkap']); ?>" required></div>
-                                                <div class="mb-3"><label>Username</label><input type="text" name="username" class="form-control" value="<?php echo htmlspecialchars($user_data['username']); ?>" required></div>
+            <form method="POST">
+                        <div class="card">
+                                    <div class="card-header">
+                                                <h6 class="m-0"><?php echo $is_edit ? 'Edit Pengguna' : 'Tambah Pengguna Baru'; ?></h6>
+                                    </div>
+                                    <div class="card-body">
+                                                <div class="mb-3"><label class="form-label">Nama Lengkap</label><input type="text" name="nama_lengkap" class="form-control" value="<?php echo htmlspecialchars($user_data['nama_lengkap']); ?>" required></div>
+                                                <div class="mb-3"><label class="form-label">Username</label><input type="text" name="username" class="form-control" value="<?php echo htmlspecialchars($user_data['username']); ?>" required></div>
                                                 <div class="mb-3">
-                                                            <label>Password</label>
+                                                            <label class="form-label">Password</label>
                                                             <input type="password" name="password" class="form-control" <?php if (!$is_edit) echo 'required'; ?>>
                                                             <?php if ($is_edit): ?><small class="text-muted">Kosongkan jika tidak ingin mengubah password.</small><?php endif; ?>
                                                 </div>
                                                 <div class="mb-3">
-                                                            <label>Role</label>
+                                                            <label class="form-label">Role</label>
                                                             <select name="role" class="form-control">
                                                                         <option value="Pegawai" <?php echo ($user_data['role'] == 'Pegawai') ? 'selected' : ''; ?>>Pegawai</option>
                                                                         <option value="Admin" <?php echo ($user_data['role'] == 'Admin') ? 'selected' : ''; ?>>Admin</option>
                                                             </select>
                                                 </div>
+                                    </div>
+                                    <div class="card-footer text-end">
                                                 <a href="<?php echo base_url('index.php?page=pengguna'); ?>" class="btn btn-secondary">Batal</a>
-                                                <button type="submit" class="btn btn-primary">Simpan</button>
-                                    </form>
+                                                <button type="submit" class="btn btn-primary"><?php echo $is_edit ? 'Simpan Perubahan' : 'Tambah Pengguna'; ?></button>
+                                    </div>
                         </div>
-            </div>
+            </form>
 </div>
