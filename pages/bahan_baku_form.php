@@ -1,4 +1,8 @@
 <?php
+if ($_SESSION['role'] !== 'Admin') {
+            redirect(base_url());
+}
+
 $is_edit = isset($_GET['id']);
 $id_bahan_baku = $is_edit ? $_GET['id'] : null;
 
@@ -37,16 +41,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<div class="container-fluid">
-            <h1 class="h3 mb-4 text-gray-800"><?php echo $is_edit ? 'Edit Bahan Baku' : 'Tambah Bahan Baku Baru'; ?></h1>
-
+<div class="container-fluid py-3">
             <?php if (isset($error)): ?>
                         <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
             <?php endif; ?>
 
-            <div class="card shadow mb-4">
-                        <div class="card-body">
-                                    <form method="POST">
+            <form method="POST">
+                        <div class="card">
+                                    <div class="card-header">
+                                                <h6 class="m-0"><?php echo $is_edit ? 'Edit Bahan Baku' : 'Tambah Bahan Baku Baru'; ?></h6>
+                                    </div>
+                                    <div class="card-body">
                                                 <div class="mb-3">
                                                             <label for="nama_bahan" class="form-label">Nama Bahan Baku</label>
                                                             <input type="text" class="form-control" id="nama_bahan" name="nama_bahan" value="<?php echo htmlspecialchars($nama_bahan); ?>" required>
@@ -59,10 +64,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                             <label for="harga_beli" class="form-label">Harga Beli</label>
                                                             <input type="number" step="0.01" class="form-control" id="harga_beli" name="harga_beli" value="<?php echo htmlspecialchars($harga_beli); ?>">
                                                 </div>
-
+                                    </div>
+                                    <div class="card-footer text-end">
                                                 <a href="<?php echo base_url('index.php?page=bahan_baku'); ?>" class="btn btn-secondary">Batal</a>
                                                 <button type="submit" class="btn btn-primary"><?php echo $is_edit ? 'Simpan Perubahan' : 'Tambah Bahan Baku'; ?></button>
-                                    </form>
+                                    </div>
                         </div>
-            </div>
+            </form>
 </div>
