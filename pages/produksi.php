@@ -30,10 +30,10 @@ try {
                 <form method="GET" class="d-flex me-2">
                     <input type="hidden" name="page" value="produksi">
                     <input type="date" name="tanggal" class="form-control form-control-sm" value="<?php echo htmlspecialchars($tanggal_filter); ?>">
-                    <button type="submit" class="btn btn-sm btn-info ms-2">Filter</button>
+                    <button type="submit" class="btn btn-sm btn-outline-success fw-bold ms-2">Filter</button>
                 </form>
-                <a href="<?php echo base_url('index.php?page=produksi_rencana_form'); ?>" class="btn btn-primary btn-sm">
-                    + Tambah Rencana
+                <a href="<?php echo base_url('index.php?page=produksi_rencana_form'); ?>" class="btn btn-outline-primary btn-sm">
+                    + Tambah
                 </a>
             </div>
         </div>

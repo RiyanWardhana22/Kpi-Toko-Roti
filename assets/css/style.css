@@ -1,10 +1,7 @@
-/* File: assets/css/style.css */
-
-/* 1. Import Font & Definisikan Variabel Warna */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
 :root {
-  --primary-color: #4a90e2; /* Biru yang lebih lembut */
+  --primary-color: #4a90e2;
   --sidebar-bg: #ffffff;
   --body-bg: #f4f7fc;
   --card-bg: #ffffff;
@@ -13,9 +10,9 @@
   --sidebar-width: 260px;
   --border-radius: 12px;
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
-/* 2. Gaya Dasar Body */
 body {
   background-color: var(--body-bg);
   font-family: "Poppins", sans-serif;
@@ -143,42 +140,30 @@ body {
 
 /* PRODUKSI START */
 .table-modern {
-  border-collapse: separate; /* Penting untuk memberi jarak antar baris */
-  border-spacing: 0 1rem; /* Memberi jarak vertikal antar baris */
   width: 100%;
 }
-
 .table-modern thead th {
   border: none;
+  border-bottom: 2px solid #eaeaea;
   text-transform: uppercase;
   color: var(--text-muted);
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.5px;
-  padding: 0 1.25rem;
+  padding: 1rem 1.25rem;
+  text-align: left;
 }
-
-.table-modern tbody tr {
-  background-color: var(--card-bg);
-  box-shadow: var(--shadow);
-  border-radius: var(--border-radius);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
 .table-modern tbody td {
   border: none;
-  padding: 1.25rem;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 1rem 1.25rem;
   vertical-align: middle;
 }
-
-.table-modern tbody td:first-child {
-  border-top-left-radius: var(--border-radius);
-  border-bottom-left-radius: var(--border-radius);
+.table-modern tbody tr:last-child td {
+  border-bottom: none;
 }
-
-.table-modern tbody td:last-child {
-  border-top-right-radius: var(--border-radius);
-  border-bottom-right-radius: var(--border-radius);
+.table-modern .fw-bold {
+  color: var(--text-color);
 }
 /* PRODUKSI END */
 
@@ -188,18 +173,28 @@ body {
     margin-left: var(--sidebar-width);
   }
 }
+
 @media (max-width: 991.98px) {
   .sidebar {
     transform: translateX(-100%);
     box-shadow: var(--shadow);
   }
+
   .sidebar.show {
     transform: translateX(0);
   }
+
   .content-wrapper {
     margin-left: 0;
   }
+
   .hamburger-btn {
     display: block;
+  }
+}
+
+@media (max-width: 364px) {
+  .btn {
+    margin-top: 0.5rem;
   }
 }
