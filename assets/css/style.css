@@ -193,8 +193,8 @@ body {
   }
 }
 
-@media (max-width: 364px) {
-  .btn {
-    margin-top: 0.5rem;
+@media (max-width: 450px) {
+  html {
+    font-size: 75%;
   }
 }
