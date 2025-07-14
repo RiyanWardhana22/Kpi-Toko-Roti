@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="row g-0 login-wrapper">
                                     <div class="col-lg-7 d-none d-lg-flex login-illustration-side">
                                                 <div class="logo"><?php echo htmlspecialchars($settings['nama_website']); ?></div>
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" style="height: 420px;" viewBox="0 0 500 500">
                                                             <g id="freepik--background-complete--inject-5">
                                                                         <path d="M79.91,316.86l-13.75.27-7,.12c-2.33,0-4.67,0-7,.05h-.44v-.44l-.06-11.72v-.51h.5l13.87.06c4.62,0,9.24.11,13.86.16h.28v.27c0,2-.09,4-.13,5.91Zm0,0-.14-5.92c0-1.95-.11-3.88-.13-5.8l.27.27c-4.62,0-9.24.16-13.86.16l-13.87.07.5-.5,0,11.72-.45-.45c2.29,0,4.57,0,6.86,0l6.89.12Z" style="fill:#ebebeb"></path>
                                                                         <path d="M64.44,331.63l-13.75.28-7,.11c-2.33.05-4.67,0-7,.06h-.44v-.45l0-11.72v-.5h.5l13.87.07c4.62,0,9.24.11,13.86.16h.28v.27c0,2-.09,4-.13,5.92Zm0,0-.14-5.92c0-1.95-.11-3.88-.13-5.8l.27.28c-4.62.05-9.24.16-13.86.16l-13.87.06.5-.5-.05,11.72-.45-.44c2.29,0,4.57,0,6.86.05l6.89.11Z" style="fill:#ebebeb"></path>
@@ -270,7 +270,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 <div class="login-form-container">
                                                             <h2>Selamat Datang</h2>
                                                             <p class="text-muted">Silakan login untuk melanjutkan.</p>
-
                                                             <?php if ($error): ?>
                                                                         <div class="alert alert-danger" role="alert"><?php echo $error; ?></div>
                                                             <?php endif; ?>

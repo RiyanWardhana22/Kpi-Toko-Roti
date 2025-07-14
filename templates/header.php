@@ -16,10 +16,10 @@ $is_settings_active = in_array($current_page, $settings_pages);
 <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title><?php echo isset($page_title) ? $page_title . ' | ' . htmlspecialchars($settings['judul_default']) : htmlspecialchars($settings['judul_default']); ?></title>
+            <title><?php echo isset($page_title) ? $page_title . ' - ' . htmlspecialchars($settings['judul_default']) : htmlspecialchars($settings['judul_default']); ?></title>
             <link rel="icon" href="<?php echo base_url('assets/images/' . htmlspecialchars($settings['favicon'])); ?>">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
             <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
             <link href="<?php echo base_url('assets/css/bootstrap.min.css'); ?>" rel="stylesheet">
             <link href="<?php echo base_url('assets/css/style.css'); ?>" rel="stylesheet">
 </head>
@@ -61,15 +61,15 @@ $is_settings_active = in_array($current_page, $settings_pages);
                                                             Laporan & Analisis
                                                 </a>
                                     </li>
-
-                                    <?php if ($_SESSION['role'] === 'Admin') : ?>
+                                    <?php if ($_SESSION['role'] === 'Admin'): ?>
                                                 <li class="nav-item">
-                                                            <a class="nav-link text-start dropdown-toggle <?php echo $is_data_master_active ? 'active' : ''; ?>" href="#dataMasterSubmenu" role="button" data-bs-toggle="collapse" aria-expanded="<?php echo $is_data_master_active ? 'true' : 'false'; ?>">
+                                                            <a class="nav-link dropdown-toggle <?php echo $is_data_master_active ? 'active' : ''; ?>" href="#dataMasterSubmenu" role="button" data-bs-toggle="collapse" aria-expanded="<?php echo $is_data_master_active ? 'true' : 'false'; ?>">
                                                                         <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                                                     <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34" />
                                                                                     <polygon points="18 2 22 6 12 16 8 16 8 12 18 2" />
                                                                         </svg>
                                                                         Data Master
+                                                                        <span class="chevron-icon"></span>
                                                             </a>
                                                             <div class="collapse submenu <?php echo $is_data_master_active ? 'show' : ''; ?>" id="dataMasterSubmenu">
                                                                         <ul class="nav flex-column">
@@ -85,6 +85,7 @@ $is_settings_active = in_array($current_page, $settings_pages);
                                                                                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
                                                                         </svg>
                                                                         Settings
+                                                                        <span class="chevron-icon"></span>
                                                             </a>
                                                             <div class="collapse submenu <?php echo $is_settings_active ? 'show' : ''; ?>" id="settingsSubmenu">
                                                                         <ul class="nav flex-column">
@@ -95,9 +96,7 @@ $is_settings_active = in_array($current_page, $settings_pages);
                                                 </li>
                                     <?php endif; ?>
                         </ul>
-                        <div class="logout-btn px-3">
-                                    <a href="<?php echo base_url('logout.php'); ?>" class="btn btn-outline-danger w-100">Logout</a>
-                        </div>
+
             </aside>
 
             <div class="sidebar-overlay" id="sidebar-overlay"></div>
@@ -111,11 +110,19 @@ $is_settings_active = in_array($current_page, $settings_pages);
                                                             </svg>
                                                 </button>
                                     </div>
-                                    <div class="d-flex align-items-center">
-                                                <div class="text-end me-3">
-                                                            <div class="fw-bold"><?php echo htmlspecialchars($_SESSION['nama_lengkap']); ?></div>
-                                                            <div class="small text-muted"><?php echo htmlspecialchars($_SESSION['role']); ?></div>
-                                                </div>
+
+                                    <div class="dropdown">
+                                                <a href="#" class="d-flex align-items-center text-decoration-none" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <div class="text-end me-2">
+                                                                        <div class="fw-bold text-dark"><?php echo htmlspecialchars($_SESSION['nama_lengkap']); ?></div>
+                                                                        <div class="small text-muted"><?php echo htmlspecialchars($_SESSION['role']); ?></div>
+                                                            </div>
+                                                            <i class="fa-solid fa-caret-down text-dark"></i>
+                                                </a>
+
+                                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                                                            <li><a class="dropdown-item" href="<?php echo base_url('logout.php'); ?>">Logout</a></li>
+                                                </ul>
                                     </div>
                         </header>
                         <div class="main-content">
