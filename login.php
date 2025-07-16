@@ -2,12 +2,57 @@
 if (session_status() == PHP_SESSION_NONE) {
             session_start();
 }
+
 if (isset($_SESSION['id_pengguna'])) {
             header('Location: index.php');
             exit();
 }
+
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/core/functions.php';
+
+$error = $_SESSION['login_error'] ?? '';
+unset($_SESSION['login_error']);
+
+if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+                        $_SESSION['login_error'] = 'Permintaan tidak valid atau sesi telah kedaluwarsa.';
+                        header('Location: login.php');
+                        exit();
+            }
+            $username = $_POST['username'] ?? '';
+            $password = $_POST['password'] ?? '';
+
+            if (empty($username) || empty($password)) {
+                        $_SESSION['login_error'] = 'Username dan password wajib diisi.';
+                        header('Location: login.php');
+                        exit();
+            }
+
+            $stmt = $pdo->prepare("SELECT * FROM pengguna WHERE username = ?");
+            $stmt->execute([$username]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($user && password_verify($password, $user['password'])) {
+                        session_regenerate_id(true);
+                        $_SESSION['id_pengguna'] = $user['id_pengguna'];
+                        $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
+                        $_SESSION['role'] = $user['role'];
+
+                        unset($_SESSION['csrf_token']);
+
+                        header('Location: index.php');
+                        exit();
+            } else {
+                        $_SESSION['login_error'] = 'Username atau password salah.';
+                        header('Location: login.php');
+                        exit();
+            }
+}
 
 $settings = [];
 try {
@@ -15,28 +60,6 @@ try {
             $settings = $stmt_settings->fetchAll(PDO::FETCH_KEY_PAIR);
 } catch (PDOException $e) {
             $settings = ['judul_default' => 'Login', 'favicon' => 'favicon.ico', 'nama_website' => 'Dashboard KPI'];
-}
-
-$error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $username = $_POST['username'];
-            $password = $_POST['password'];
-            if (empty($username) || empty($password)) {
-                        $error = 'Username dan password wajib diisi.';
-            } else {
-                        $stmt = $pdo->prepare("SELECT * FROM pengguna WHERE username = ?");
-                        $stmt->execute([$username]);
-                        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-                        if ($user && password_verify($password, $user['password'])) {
-                                    $_SESSION['id_pengguna'] = $user['id_pengguna'];
-                                    $_SESSION['nama_lengkap'] = $user['nama_lengkap'];
-                                    $_SESSION['role'] = $user['role'];
-                                    header('Location: index.php');
-                                    exit();
-                        } else {
-                                    $error = 'Username atau password salah.';
-                        }
-            }
 }
 ?>
 <!DOCTYPE html>
@@ -57,7 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="container-fluid p-0">
                         <div class="row g-0 login-wrapper">
                                     <div class="col-lg-7 d-none d-lg-flex login-illustration-side">
-                                                <div class="logo"><?php echo htmlspecialchars($settings['nama_website']); ?></div>
                                                 <svg xmlns="http://www.w3.org/2000/svg" style="height: 420px;" viewBox="0 0 500 500">
                                                             <g id="freepik--background-complete--inject-5">
                                                                         <path d="M79.91,316.86l-13.75.27-7,.12c-2.33,0-4.67,0-7,.05h-.44v-.44l-.06-11.72v-.51h.5l13.87.06c4.62,0,9.24.11,13.86.16h.28v.27c0,2-.09,4-.13,5.91Zm0,0-.14-5.92c0-1.95-.11-3.88-.13-5.8l.27.27c-4.62,0-9.24.16-13.86.16l-13.87.07.5-.5,0,11.72-.45-.45c2.29,0,4.57,0,6.86,0l6.89.12Z" style="fill:#ebebeb"></path>
@@ -268,13 +290,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
                                     <div class="col-lg-5 col-md-12 login-form-side">
                                                 <div class="login-form-container">
-                                                            <h2>Selamat Datang</h2>
-                                                            <p class="text-muted">Silakan login untuk melanjutkan.</p>
+                                                            <h2>Selamat Datang!</h2>
+                                                            <p class="text-muted">Selamat Datang Di Dashboard KPI <?php echo htmlspecialchars($settings['nama_website']); ?></p>
+
                                                             <?php if ($error): ?>
                                                                         <div class="alert alert-danger" role="alert"><?php echo $error; ?></div>
                                                             <?php endif; ?>
 
                                                             <form method="POST">
+                                                                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+
                                                                         <div class="mb-3">
                                                                                     <label for="username" class="form-label">Username</label>
                                                                                     <input type="text" class="form-control" id="username" name="username" required>
