@@ -62,7 +62,7 @@ $resep_produk = $stmt_resep->fetchAll(PDO::FETCH_ASSOC);
     <?php endif; ?>
 
     <div class="card mb-4">
-        <div class="card-header">
+        <div class="card-header mb-0">
             <p class="text-muted mb-0">Manajemen Resep untuk:</p>
             <h4 class="fw-bold"><?php echo htmlspecialchars($produk['nama_produk']); ?></h4>
         </div>
@@ -81,7 +81,7 @@ $resep_produk = $stmt_resep->fetchAll(PDO::FETCH_ASSOC);
             <div id="catatanForm" style="display: none;">
                 <form method="POST">
                     <div class="mb-2">
-                        <textarea class="form-control" name="catatan_produk" rows="4" placeholder="Contoh: Oven minimal 30 menit, aduk adonan hingga kalis..."><?php echo htmlspecialchars($produk['catatan']); ?></textarea>
+                        <textarea class="form-control" name="catatan_produk" rows="4" placeholder="Contoh: Oven minimal 30 menit, aduk adonan hingga kalis..."><?php echo htmlspecialchars($produk['catatan'] ?? ''); ?></textarea>
                     </div>
                     <div class="text-end">
                         <button type="button" id="batalCatatanBtn" class="btn btn-secondary">Batal</button>
