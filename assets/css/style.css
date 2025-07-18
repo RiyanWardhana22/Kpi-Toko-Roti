@@ -121,7 +121,7 @@ body {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--primary-color);
-  padding: 0 1rem 1.5rem 1rem;
+  /* padding: 0 1rem 1.5rem 1rem; */
   text-align: center;
 }
 .sidebar .nav-link {

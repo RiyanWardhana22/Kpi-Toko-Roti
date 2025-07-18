@@ -30,6 +30,7 @@ $is_settings_active = in_array($current_page, $settings_pages);
                         <div class="sidebar-header">
                                     <?php echo htmlspecialchars($settings['nama_website']); ?>
                         </div>
+                        <hr>
                         <ul class="nav flex-column">
                                     <li class="nav-item <?php echo $current_page == 'dashboard' ? 'active' : ''; ?>">
                                                 <a class="nav-link" href="<?php echo base_url('index.php?page=dashboard'); ?>">
