@@ -53,31 +53,32 @@ $is_settings_active = in_array($current_page, $settings_pages);
                                                             Manajemen Produksi
                                                 </a>
                                     </li>
-                                    <li class="nav-item <?php echo str_starts_with($current_page, 'laporan') ? 'active' : ''; ?>">
-                                                <a class="nav-link" href="<?php echo base_url('index.php?page=laporan'); ?>">
+                                    <li class="nav-item">
+                                                <a class="nav-link dropdown-toggle <?php echo $is_data_master_active ? 'active' : ''; ?>" href="#dataMasterSubmenu" role="button" data-bs-toggle="collapse" aria-expanded="<?php echo $is_data_master_active ? 'true' : 'false'; ?>">
                                                             <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                                        <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
-                                                                        <path d="M22 12A10 10 0 0 0 12 2v10z" />
+                                                                        <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34" />
+                                                                        <polygon points="18 2 22 6 12 16 8 16 8 12 18 2" />
                                                             </svg>
-                                                            Laporan & Analisis
+                                                            Data Master
+                                                            <span class="chevron-icon"></span>
                                                 </a>
+                                                <div class="collapse submenu <?php echo $is_data_master_active ? 'show' : ''; ?>" id="dataMasterSubmenu">
+                                                            <ul class="nav flex-column">
+                                                                        <li><a class="dropdown-item <?php echo in_array($current_page, ['produk', 'produk_form', 'resep']) ? 'active' : ''; ?>" href="<?php echo base_url('index.php?page=produk'); ?>">Data Produk</a></li>
+                                                                        <li><a class="dropdown-item <?php echo in_array($current_page, ['bahan_baku', 'bahan_baku_form']) ? 'active' : ''; ?>" href="<?php echo base_url('index.php?page=bahan_baku'); ?>">Data Bahan Baku</a></li>
+                                                            </ul>
+                                                </div>
                                     </li>
+
                                     <?php if ($_SESSION['role'] === 'Admin'): ?>
-                                                <li class="nav-item">
-                                                            <a class="nav-link dropdown-toggle <?php echo $is_data_master_active ? 'active' : ''; ?>" href="#dataMasterSubmenu" role="button" data-bs-toggle="collapse" aria-expanded="<?php echo $is_data_master_active ? 'true' : 'false'; ?>">
+                                                <li class="nav-item <?php echo str_starts_with($current_page, 'laporan') ? 'active' : ''; ?>">
+                                                            <a class="nav-link" href="<?php echo base_url('index.php?page=laporan'); ?>">
                                                                         <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                                                    <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34" />
-                                                                                    <polygon points="18 2 22 6 12 16 8 16 8 12 18 2" />
+                                                                                    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+                                                                                    <path d="M22 12A10 10 0 0 0 12 2v10z" />
                                                                         </svg>
-                                                                        Data Master
-                                                                        <span class="chevron-icon"></span>
+                                                                        Laporan & Analisis
                                                             </a>
-                                                            <div class="collapse submenu <?php echo $is_data_master_active ? 'show' : ''; ?>" id="dataMasterSubmenu">
-                                                                        <ul class="nav flex-column">
-                                                                                    <li><a class="dropdown-item <?php echo in_array($current_page, ['produk', 'produk_form', 'resep']) ? 'active' : ''; ?>" href="<?php echo base_url('index.php?page=produk'); ?>">Data Produk</a></li>
-                                                                                    <li><a class="dropdown-item <?php echo in_array($current_page, ['bahan_baku', 'bahan_baku_form']) ? 'active' : ''; ?>" href="<?php echo base_url('index.php?page=bahan_baku'); ?>">Data Bahan Baku</a></li>
-                                                                        </ul>
-                                                            </div>
                                                 </li>
                                                 <li class="nav-item">
                                                             <a class="nav-link dropdown-toggle <?php echo $is_settings_active ? 'active' : ''; ?>" href="#settingsSubmenu" role="button" data-bs-toggle="collapse" aria-expanded="<?php echo $is_settings_active ? 'true' : 'false'; ?>">

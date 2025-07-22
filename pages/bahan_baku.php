@@ -1,7 +1,4 @@
 <?php
-if ($_SESSION['role'] !== 'Admin') {
-            redirect(base_url());
-}
 
 $search_term = isset($_GET['q']) ? trim($_GET['q']) : '';
 $limit = 10;

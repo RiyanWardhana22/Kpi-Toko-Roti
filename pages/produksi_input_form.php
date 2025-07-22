@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <input type="number" class="form-control" id="jumlah_sukses" name="jumlah_sukses" required>
                             </div>
                             <div class="mb-3">
-                                <label for="jumlah_gagal" class="form-label">Jumlah Produk Gagal (Waste)</label>
+                                <label for="jumlah_gagal" class="form-label">Jumlah Produk Gagal</label>
                                 <input type="number" class="form-control" id="jumlah_gagal" name="jumlah_gagal" value="0" required>
                             </div>
                             <div class="mb-3">
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="card-footer text-end">
                     <a href="<?php echo base_url('index.php?page=produksi'); ?>" class="btn btn-secondary">Batal</a>
-                    <button type="submit" class="btn btn-primary" <?php if (empty($resep)) echo 'disabled'; ?>>Simpan Hasil</button>
+                    <button type="submit" class="btn btn-primary btn-sm" <?php if (empty($resep)) echo 'disabled'; ?>>Simpan Hasil</button>
                 </div>
             </div>
         </form>

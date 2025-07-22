@@ -1,8 +1,4 @@
 <?php
-if ($_SESSION['role'] !== 'Admin') {
-            redirect(base_url());
-}
-
 $is_edit = isset($_GET['id']);
 $id_produk = $is_edit ? $_GET['id'] : null;
 $nama_produk = '';

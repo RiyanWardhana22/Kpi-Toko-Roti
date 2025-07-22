@@ -1,8 +1,4 @@
 <?php
-if ($_SESSION['role'] !== 'Admin') {
-            redirect(base_url());
-}
-
 $search_term = isset($_GET['q']) ? trim($_GET['q']) : '';
 $limit = 10;
 $page = isset($_GET['p']) ? (int)$_GET['p'] : 1;
