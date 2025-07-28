@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 11, 2025 at 02:32 PM
+-- Generation Time: Jul 28, 2025 at 07:59 AM
 -- Server version: 8.0.42
 -- PHP Version: 8.3.22
 
@@ -94,6 +94,7 @@ INSERT INTO `pengguna` (`id_pengguna`, `nama_lengkap`, `username`, `password`, `
 CREATE TABLE `produk` (
   `id_produk` int NOT NULL,
   `nama_produk` varchar(100) NOT NULL,
+  `catatan` text,
   `foto_produk` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -101,9 +102,10 @@ CREATE TABLE `produk` (
 -- Dumping data for table `produk`
 --
 
-INSERT INTO `produk` (`id_produk`, `nama_produk`, `foto_produk`) VALUES
-(1, 'Kue Ulang Tahun', NULL),
-(2, 'Kue Kacang', NULL);
+INSERT INTO `produk` (`id_produk`, `nama_produk`, `catatan`, `foto_produk`) VALUES
+(1, 'Kue Ulang Tahun', NULL, NULL),
+(2, 'Kue Kacang', '', NULL),
+(3, 'Roti Strawbery', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -286,7 +288,7 @@ ALTER TABLE `pengguna`
 -- AUTO_INCREMENT for table `produk`
 --
 ALTER TABLE `produk`
-  MODIFY `id_produk` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_produk` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `produksi_log`
