@@ -1,99 +1,149 @@
 <?php
-if (!isset($_GET['id_rencana'])) {
-    redirect(base_url('index.php?page=produksi'));
-}
-$id_rencana = $_GET['id_rencana'];
+// Ambil data rencana produksi yang akan diinput hasilnya
+$id_rencana = isset($_GET['id_rencana']) ? (int)$_GET['id_rencana'] : 0;
+$stmt_rencana = $pdo->prepare("
+    SELECT pr.*, p.nama_produk 
+    FROM produksi_rencana pr 
+    JOIN produk p ON pr.id_produk = p.id_produk 
+    WHERE pr.id_rencana = ?
+");
+$stmt_rencana->execute([$id_rencana]);
+$rencana = $stmt_rencana->fetch(PDO::FETCH_ASSOC);
 
-$stmt = $pdo->prepare("SELECT pr.id_produk, p.nama_produk, pr.target_produksi FROM produksi_rencana pr JOIN produk p ON pr.id_produk = p.id_produk WHERE pr.id_rencana = ?");
-$stmt->execute([$id_rencana]);
-$rencana = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$rencana) {
-    redirect(base_url('index.php?page=produksi'));
+    redirect(base_url('index.php?page=produksi&status=notfound'));
+    exit();
 }
 
-$stmt_resep = $pdo->prepare("SELECT r.id_bahan_baku, bb.nama_bahan, r.jumlah_standar, bb.satuan FROM resep r JOIN bahan_baku bb ON r.id_bahan_baku = bb.id_bahan_baku WHERE r.id_produk = ?");
-$stmt_resep->execute([$rencana['id_produk']]);
-$resep = $stmt_resep->fetchAll(PDO::FETCH_ASSOC);
-
+// --- LOGIKA UTAMA: Proses form saat disubmit ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $jumlah_sukses = $_POST['jumlah_sukses'];
-    $jumlah_gagal = $_POST['jumlah_gagal'];
+    $jumlah_sukses = (int)$_POST['jumlah_sukses'];
+    $jumlah_gagal = (int)$_POST['jumlah_gagal'];
     $alasan_gagal = $_POST['alasan_gagal'];
-    $penggunaan_bahan = $_POST['penggunaan_bahan'];
-
-    $pdo->beginTransaction();
+    $kode_batch_input = trim($_POST['kode_batch']); // Ambil kode batch dari form
+    $id_produk = $rencana['id_produk'];
+    $id_pengguna = $_SESSION['id_pengguna'];
+    
     try {
-        $id_pengguna_saat_ini = $_SESSION['id_pengguna'];
-        $stmt_log = $pdo->prepare("INSERT INTO produksi_log (id_rencana, tanggal_aktual, id_produk, jumlah_sukses, jumlah_gagal, alasan_gagal, id_pengguna_input) VALUES (?, NOW(), ?, ?, ?, ?, ?)");
-        $stmt_log->execute([$id_rencana, $rencana['id_produk'], $jumlah_sukses, $jumlah_gagal, $alasan_gagal, $id_pengguna_saat_ini]);
-        $id_log = $pdo->lastInsertId();
-        $stmt_bahan = $pdo->prepare("INSERT INTO produksi_penggunaan_bahan (id_log, id_bahan_baku, jumlah_aktual) VALUES (?, ?, ?)");
-        foreach ($penggunaan_bahan as $id_bahan_baku => $jumlah_aktual) {
-            if (!empty($jumlah_aktual)) {
-                $stmt_bahan->execute([$id_log, $id_bahan_baku, $jumlah_aktual]);
+        $pdo->beginTransaction();
+
+        // 1. Simpan log produksi utama ke tabel 'produksi_log'
+        $stmt_log = $pdo->prepare("
+            INSERT INTO produksi_log (id_rencana, tanggal_aktual, id_produk, jumlah_sukses, jumlah_gagal, alasan_gagal, id_pengguna_input)
+            VALUES (?, NOW(), ?, ?, ?, ?, ?)
+        ");
+        $stmt_log->execute([$id_rencana, $id_produk, $jumlah_sukses, $jumlah_gagal, $alasan_gagal, $id_pengguna]);
+        $id_log_baru = $pdo->lastInsertId();
+
+        // 2. Jika ada produk yang sukses dibuat, lakukan pengurangan stok bahan baku
+        if ($jumlah_sukses > 0) {
+            $stmt_resep = $pdo->prepare("SELECT id_bahan_baku, jumlah FROM resep WHERE id_produk = ?");
+            $stmt_resep->execute([$id_produk]);
+            $resep_produk = $stmt_resep->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($resep_produk as $bahan) {
+                $id_bahan_baku = $bahan['id_bahan_baku'];
+                $total_dibutuhkan = $bahan['jumlah'] * $jumlah_sukses;
+
+                $stmt_batch = $pdo->prepare("SELECT * FROM stok_batch WHERE id_bahan_baku = ? AND sisa_dasar > 0 ORDER BY tanggal_kadaluarsa ASC");
+                $stmt_batch->execute([$id_bahan_baku]);
+                $batch_tersedia = $stmt_batch->fetchAll(PDO::FETCH_ASSOC);
+                
+                $total_stok_bahan_ini = array_sum(array_column($batch_tersedia, 'sisa_dasar'));
+                if ($total_stok_bahan_ini < $total_dibutuhkan) {
+                    throw new Exception("Stok untuk bahan baku (ID: $id_bahan_baku) tidak mencukupi.");
+                }
+
+                foreach ($batch_tersedia as $batch) {
+                    if ($total_dibutuhkan <= 0) break;
+                    $ambil_dari_batch = min($batch['sisa_dasar'], $total_dibutuhkan);
+
+                    $stmt_update_batch = $pdo->prepare("UPDATE stok_batch SET sisa_dasar = sisa_dasar - ? WHERE id_batch = ?");
+                    $stmt_update_batch->execute([$ambil_dari_batch, $batch['id_batch']]);
+
+                    $stmt_penggunaan = $pdo->prepare("INSERT INTO produksi_penggunaan_bahan (id_log, id_bahan_baku, id_batch, jumlah_aktual) VALUES (?, ?, ?, ?)");
+                    $stmt_penggunaan->execute([$id_log_baru, $id_bahan_baku, $batch['id_batch'], $ambil_dari_batch]);
+
+                    $total_dibutuhkan -= $ambil_dari_batch;
+                }
             }
         }
+        
+        // --- TAMBAHAN: PROSES C - MEMBUAT BATCH PRODUK JADI ---
+        if ($jumlah_sukses > 0) {
+            $stmt_produk_info = $pdo->prepare("SELECT masa_simpan_hari FROM produk WHERE id_produk = ?");
+            $stmt_produk_info->execute([$id_produk]);
+            $masa_simpan = (int)$stmt_produk_info->fetchColumn();
+
+            $tanggal_produksi = date('Y-m-d H:i:s');
+            $tanggal_kadaluarsa = date('Y-m-d', strtotime($tanggal_produksi . " +{$masa_simpan} days"));
+
+            $stmt_batch_jadi = $pdo->prepare(
+                "INSERT INTO produk_jadi_batch 
+                (id_produk, id_log_produksi, kode_batch, jumlah_produksi, sisa_stok, tanggal_produksi, tanggal_kadaluarsa)
+                VALUES (?, ?, ?, ?, ?, ?, ?)"
+            );
+            $stmt_batch_jadi->execute([$id_produk, $id_log_baru, $kode_batch_input, $jumlah_sukses, $jumlah_sukses, $tanggal_produksi, $tanggal_kadaluarsa]);
+        }
+        // --- AKHIR DARI BLOK TAMBAHAN ---
+        
         $pdo->commit();
-        redirect(base_url('index.php?page=produksi&status=input_sukses'));
+        redirect(base_url('index.php?page=produksi&status=sukses_input'));
+
     } catch (Exception $e) {
         $pdo->rollBack();
-        $error = "Terjadi kesalahan saat menyimpan data: " . $e->getMessage();
+        $error = "Gagal memproses: " . $e->getMessage();
     }
 }
 ?>
 
 <div class="container-fluid py-3">
     <div class="card">
-        <div class="card-header">
-            <p class="text-muted mb-2">Input Hasil Produksi untuk: <strong><?php echo htmlspecialchars($rencana['nama_produk']); ?></strong> (Target: <?php echo htmlspecialchars($rencana['target_produksi']); ?>)</p>
-        </div>
-
-        <?php if (isset($error)): ?>
-            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
-        <?php endif; ?>
-
+        <div class="card-header"><h6 class="m-0">Input Hasil Produksi</h6></div>
         <form method="POST">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <h6 class="mb-3 fw-bold">Hasil Produksi</h6>
-                            <div class="mb-3">
-                                <label for="jumlah_sukses" class="form-label">Jumlah Produk Berhasil</label>
-                                <input type="number" class="form-control" id="jumlah_sukses" name="jumlah_sukses" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="jumlah_gagal" class="form-label">Jumlah Produk Gagal</label>
-                                <input type="number" class="form-control" id="jumlah_gagal" name="jumlah_gagal" value="0" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="alasan_gagal" class="form-label">Alasan Gagal (Jika ada)</label>
-                                <textarea class="form-control" id="alasan_gagal" name="alasan_gagal" rows="3"></textarea>
-                            </div>
-                        </div>
+            <div class="card-body">
+                <?php if (isset($error)): ?>
+                    <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+                <?php endif; ?>
 
-                        <div class="col-lg-6">
-                            <h6 class="mb-3 fw-bold">Penggunaan Bahan Baku Aktual</h6>
-                            <?php if (empty($resep)): ?>
-                                <div class="alert alert-warning">Resep untuk produk ini belum diatur.</div>
-                            <?php else: ?>
-                                <?php foreach ($resep as $item): ?>
-                                    <div class="mb-3">
-                                        <label class="form-label">
-                                            <?php echo htmlspecialchars($item['nama_bahan']); ?>
-                                            <small class="text-muted">(Standar: <?php echo "{$item['jumlah_standar']} {$item['satuan']}"; ?>)</small>
-                                        </label>
-                                        <input type="number" step="0.001" class="form-control" name="penggunaan_bahan[<?php echo $item['id_bahan_baku']; ?>]" placeholder="Jumlah aktual dalam <?php echo htmlspecialchars($item['satuan']); ?>" required>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Produk:</strong>
+                        <p><?php echo htmlspecialchars($rencana['nama_produk']); ?></p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Target Produksi:</strong>
+                        <p><?php echo htmlspecialchars($rencana['target_produksi']); ?> Pcs</p>
                     </div>
                 </div>
-                <div class="card-footer text-end">
-                    <a href="<?php echo base_url('index.php?page=produksi'); ?>" class="btn btn-secondary">Batal</a>
-                    <button type="submit" class="btn btn-primary btn-sm" <?php if (empty($resep)) echo 'disabled'; ?>>Simpan Hasil</button>
+                <hr>
+
+                <div class="mb-3">
+                    <label for="kode_batch" class="form-label fw-bold">Kode Batch Produksi</label>
+                    <input type="text" class="form-control" id="kode_batch" name="kode_batch" placeholder="Contoh: RC-130825-01" required>
+                    <div class="form-text">Masukkan kode unik untuk melacak batch produksi ini.</div>
                 </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="jumlah_sukses" class="form-label">Jumlah Sukses</label>
+                        <input type="number" class="form-control" id="jumlah_sukses" name="jumlah_sukses" value="0" required>
+                        <div class="form-text">Jumlah produk yang berhasil dibuat sesuai standar.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="jumlah_gagal" class="form-label">Jumlah Gagal</label>
+                        <input type="number" class="form-control" id="jumlah_gagal" name="jumlah_gagal" value="0" required>
+                        <div class="form-text">Jumlah produk yang gagal/rusak.</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="alasan_gagal" class="form-label">Alasan Gagal (Jika Ada)</label>
+                    <textarea class="form-control" id="alasan_gagal" name="alasan_gagal" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <a href="<?php echo base_url('index.php?page=produksi'); ?>" class="btn btn-secondary">Batal</a>
+                <button type="submit" class="btn btn-primary">Simpan Hasil Produksi</button>
             </div>
         </form>
     </div>

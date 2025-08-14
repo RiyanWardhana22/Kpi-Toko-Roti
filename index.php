@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 ob_start();
 
 if (session_status() == PHP_SESSION_NONE) {
@@ -25,19 +28,30 @@ $allowed_pages =
                         'bahan_baku',
                         'bahan_baku_form',
                         'bahan_baku_hapus',
+                        'tambah_stok_form',
+                        'stok_harian',
+                        'hapus_stok_batch',
                         'resep',
                         'resep_hapus',
                         'produksi',
                         'produksi_rencana_form',
                         'produksi_input_form',
+                        'produksi_daftar',
+                        'produksi_buat',
+                        'produksi_aksi_buat',
+                        'produksi_aksi_mulai',
+                        'produksi_aksi_selesai',
+                        'produksi_detail',
                         'laporan',
+                        'laporan_penggunaan_harian',
                         'laporan_waste',
                         'laporan_efisiensi',
                         'laporan_pencapaian',
                         'pengguna',
                         'pengguna_form',
                         'pengguna_hapus',
-                        'settings'
+                        'settings',
+                        'reset_data',
             ];
 
 $page_title = ucfirst(str_replace('_', ' ', $page));

@@ -1,47 +1,87 @@
 <?php
+// pages/dashboard.php
+
+// 1. Logika Filter Tanggal
 $tanggal_awal = isset($_GET['awal']) ? $_GET['awal'] : date('Y-m-d', strtotime('-6 days'));
 $tanggal_akhir = isset($_GET['akhir']) ? $_GET['akhir'] : date('Y-m-d');
-if ($tanggal_awal == $tanggal_akhir) {
-    $periode_label = "Tanggal " . date('d M Y', strtotime($tanggal_awal));
-} else {
-    $periode_label = "Periode " . date('d M Y', strtotime($tanggal_awal)) . " - " . date('d M Y', strtotime($tanggal_akhir));
-}
+$periode_params = [$tanggal_awal, $tanggal_akhir];
 
-$stmt_target = $pdo->prepare("SELECT SUM(target_produksi) as total_target FROM produksi_rencana WHERE tanggal_produksi BETWEEN ? AND ?");
-$stmt_target->execute([$tanggal_awal, $tanggal_akhir]);
-$total_target = $stmt_target->fetchColumn();
-$stmt_sukses = $pdo->prepare("SELECT SUM(jumlah_sukses) as total_sukses FROM produksi_log WHERE DATE(tanggal_aktual) BETWEEN ? AND ?");
-$stmt_sukses->execute([$tanggal_awal, $tanggal_akhir]);
-$total_sukses = $stmt_sukses->fetchColumn();
-$persentase_pencapaian = ($total_target > 0) ? ($total_sukses / $total_target) * 100 : 0;
 
-$stmt_gagal = $pdo->prepare("SELECT SUM(jumlah_gagal) as total_gagal FROM produksi_log WHERE DATE(tanggal_aktual) BETWEEN ? AND ?");
-$stmt_gagal->execute([$tanggal_awal, $tanggal_akhir]);
-$total_gagal = $stmt_gagal->fetchColumn() ?: 0;
+// ==================== BAGIAN LOGIKA PHP YANG DIPERBARUI ====================
 
-$stmt_efisiensi = $pdo->prepare("SELECT (SUM(r.jumlah_standar * pl.jumlah_sukses) / SUM(ppb.jumlah_aktual)) * 100 AS efisiensi FROM produksi_log pl JOIN produksi_penggunaan_bahan ppb ON pl.id_log = ppb.id_log JOIN resep r ON pl.id_produk = r.id_produk AND ppb.id_bahan_baku = r.id_bahan_baku WHERE DATE(pl.tanggal_aktual) BETWEEN ? AND ?");
-$stmt_efisiensi->execute([$tanggal_awal, $tanggal_akhir]);
-$efisiensi_bahan = $stmt_efisiensi->fetchColumn() ?: 0;
+// --- 2. Query KPI Produksi (Menggunakan tabel perintah_kerja) ---
+$stmt_produksi = $pdo->prepare("
+    SELECT
+        COALESCE(SUM(jumlah_direncanakan), 0) AS total_target,
+        COALESCE(SUM(jumlah_sukses), 0) AS total_sukses,
+        COALESCE(SUM(jumlah_gagal), 0) AS total_gagal
+    FROM perintah_kerja
+    WHERE status = 'Selesai' AND DATE(tanggal_selesai) BETWEEN ? AND ?
+");
+$stmt_produksi->execute($periode_params);
+$data_produksi = $stmt_produksi->fetch(PDO::FETCH_ASSOC);
 
-$stmt_rincian = $pdo->prepare("SELECT p.nama_produk, pr.target_produksi, COALESCE(SUM(pl.jumlah_sukses), 0) as total_sukses FROM produksi_rencana pr JOIN produk p ON pr.id_produk = p.id_produk LEFT JOIN produksi_log pl ON pr.id_rencana = pl.id_rencana WHERE pr.tanggal_produksi BETWEEN ? AND ? GROUP BY p.nama_produk, pr.target_produksi ORDER BY p.nama_produk");
-$stmt_rincian->execute([$tanggal_awal, $tanggal_akhir]);
-$rincian_pencapaian = $stmt_rincian->fetchAll(PDO::FETCH_ASSOC);
+// Kalkulasi metrik
+$persentase_pencapaian = ($data_produksi['total_target'] > 0) ? ($data_produksi['total_sukses'] / $data_produksi['total_target']) * 100 : 0;
+$total_produksi_aktual = $data_produksi['total_sukses'] + $data_produksi['total_gagal'];
+$tingkat_kegagalan = ($total_produksi_aktual > 0) ? ($data_produksi['total_gagal'] / $total_produksi_aktual) * 100 : 0;
 
-$stmt_aktivitas = $pdo->prepare("SELECT p.nama_produk, pl.jumlah_sukses, COALESCE(u.nama_lengkap, 'Sistem') as nama_pengguna, pl.tanggal_aktual FROM produksi_log pl JOIN produk p ON pl.id_produk = p.id_produk LEFT JOIN pengguna u ON pl.id_pengguna_input = u.id_pengguna WHERE DATE(pl.tanggal_aktual) BETWEEN ? AND ? ORDER BY pl.id_log DESC LIMIT 5");
-$stmt_aktivitas->execute([$tanggal_awal, $tanggal_akhir]);
-$aktivitas_terkini = $stmt_aktivitas->fetchAll(PDO::FETCH_ASSOC);
 
-$stmt_grafik = $pdo->prepare("SELECT DATE(tanggal_aktual) as tanggal, SUM(jumlah_sukses) as total FROM produksi_log WHERE DATE(tanggal_aktual) BETWEEN ? AND ? GROUP BY DATE(tanggal_aktual) ORDER BY tanggal ASC");
-$stmt_grafik->execute([$tanggal_awal, $tanggal_akhir]);
+// --- 3. Query Panel Peringatan Bahan Baku (Tidak ada perubahan) ---
+$stmt_kritis = $pdo->query("
+    SELECT 
+        bb.nama_bahan, bb.satuan, bb.stok_minimum,
+        COALESCE(SUM(sb.sisa_dasar), 0) as total_sisa
+    FROM bahan_baku bb
+    LEFT JOIN stok_batch sb ON bb.id_bahan_baku = sb.id_bahan_baku AND sb.sisa_dasar > 0
+    GROUP BY bb.id_bahan_baku, bb.nama_bahan, bb.satuan, bb.stok_minimum
+    HAVING total_sisa < bb.stok_minimum AND bb.stok_minimum > 0
+");
+$stok_kritis = $stmt_kritis->fetchAll(PDO::FETCH_ASSOC);
+
+$stmt_kadaluarsa = $pdo->query("
+    SELECT sb.*, bb.nama_bahan, bb.satuan, DATEDIFF(sb.tanggal_kadaluarsa, CURDATE()) AS sisa_hari
+    FROM stok_batch sb
+    JOIN bahan_baku bb ON sb.id_bahan_baku = bb.id_bahan_baku
+    WHERE sb.sisa_dasar > 0 AND DATEDIFF(sb.tanggal_kadaluarsa, CURDATE()) <= 3
+    ORDER BY sb.tanggal_kadaluarsa ASC
+");
+$stok_kadaluarsa = $stmt_kadaluarsa->fetchAll(PDO::FETCH_ASSOC);
+
+
+// --- 4. Query Panel Peringatan Produk Jadi (Tidak ada perubahan) ---
+$stmt_pj_kadaluarsa = $pdo->query("
+    SELECT 
+        pjb.kode_batch, pjb.sisa_stok, p.nama_produk, 
+        DATEDIFF(pjb.tanggal_kadaluarsa, CURDATE()) AS sisa_hari
+    FROM produk_jadi_batch AS pjb
+    JOIN produk AS p ON pjb.id_produk = p.id_produk
+    WHERE pjb.sisa_stok > 0 AND DATEDIFF(pjb.tanggal_kadaluarsa, CURDATE()) <= 1
+    ORDER BY pjb.tanggal_kadaluarsa ASC
+");
+$produk_jadi_kadaluarsa = $stmt_pj_kadaluarsa->fetchAll(PDO::FETCH_ASSOC);
+
+
+// --- 5. Query & Persiapan Data untuk Grafik (Menggunakan tabel perintah_kerja) ---
+$stmt_grafik = $pdo->prepare("
+    SELECT DATE(tanggal_selesai) as tanggal, SUM(jumlah_sukses) as total 
+    FROM perintah_kerja 
+    WHERE status = 'Selesai' AND DATE(tanggal_selesai) BETWEEN ? AND ?
+    GROUP BY DATE(tanggal_selesai) ORDER BY tanggal ASC
+");
+$stmt_grafik->execute($periode_params);
 $data_grafik_db = $stmt_grafik->fetchAll(PDO::FETCH_ASSOC);
+
+// Memformat data agar siap dipakai oleh Chart.js (Tidak ada perubahan)
 $grafik_labels = [];
 $grafik_data = [];
+$data_grafik_assoc = array_column($data_grafik_db, 'total', 'tanggal');
 $begin = new DateTime($tanggal_awal);
 $end = new DateTime($tanggal_akhir);
 $end->modify('+1 day');
 $interval = new DateInterval('P1D');
 $dateRange = new DatePeriod($begin, $interval, $end);
-$data_grafik_assoc = array_column($data_grafik_db, 'total', 'tanggal');
+
 foreach ($dateRange as $date) {
     $formatted_date_key = $date->format('Y-m-d');
     $grafik_labels[] = $date->format('d M');
@@ -49,143 +89,190 @@ foreach ($dateRange as $date) {
 }
 ?>
 
-<div class="container-fluid py-3">
-    <div class="card">
+<div class="container-fluid py-3 px-4">
+
+    <div class="card shadow mb-4">
         <div class="card-body">
-            <form method="GET" class="d-flex flex-wrap align-items-center">
+            <form method="GET" class="d-flex flex-wrap align-items-center" action="">
                 <input type="hidden" name="page" value="dashboard">
-                <div class="flex-grow-1 d-flex flex-wrap align-items-center">
-                    <div class="col-lg-auto col-12 fw-bold me-3 mb-2 mb-lg-0">Filter Periode:</div>
-                    <div class="col-lg-4 col-12 me-2 mb-2 mb-lg-0"><input type="date" name="awal" class="form-control" value="<?php echo $tanggal_awal; ?>"></div>
-                    <div class="col-lg-4 col-12 me-2 mb-2 mb-lg-0"><input type="date" name="akhir" class="form-control" value="<?php echo $tanggal_akhir; ?>"></div>
-                    <div class="col-lg-1 col-12"><button type="submit" class="btn btn-primary w-100">Go</button></div>
+                <div class="me-3 mb-2">
+                    <label for="awal" class="form-label-sm fw-bold">Tanggal Awal:</label>
+                    <input type="date" id="awal" name="awal" class="form-control form-control-sm" value="<?php echo $tanggal_awal; ?>">
+                </div>
+                <div class="me-3 mb-2">
+                    <label for="akhir" class="form-label-sm fw-bold">Tanggal Akhir:</label>
+                    <input type="date" id="akhir" name="akhir" class="form-control form-control-sm" value="<?php echo $tanggal_akhir; ?>">
+                </div>
+                <div class="align-self-end mb-2">
+                    <button type="submit" class="btn btn-primary btn-sm">Terapkan</button>
                 </div>
             </form>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="m-0">Grafik Tren Produksi</h6>
+        <div class="col-lg-6 col-md-6 mb-4">
+            <a href="index.php?page=laporan_pencapaian&awal=<?php echo $tanggal_awal; ?>&akhir=<?php echo $tanggal_akhir; ?>" class="text-decoration-none">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Pencapaian Target</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo number_format($persentase_pencapaian, 1); ?>%</div>
+                                <small class="text-muted"><?php echo number_format($data_produksi['total_sukses']) . ' dari ' . number_format($data_produksi['total_target']) . ' Pcs'; ?></small>
+                            </div>
+                            <div class="col-auto"><i class="fas fa-bullseye fa-2x text-gray-300"></i></div>
+                        </div>
+                    </div>
                 </div>
+            </a>
+        </div>
+        <div class="col-lg-6 col-md-6 mb-4">
+            <a href="index.php?page=laporan_kegagalan&awal=<?php echo $tanggal_awal; ?>&akhir=<?php echo $tanggal_akhir; ?>" class="text-decoration-none">
+                <div class="card border-left-danger shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Tingkat Produk Gagal</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo number_format($tingkat_kegagalan, 1); ?>%</div>
+                                <small class="text-muted"><?php echo number_format($data_produksi['total_gagal']) . ' dari ' . number_format($total_produksi_aktual) . ' Pcs'; ?></small>
+                            </div>
+                            <div class="col-auto"><i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header"><h6 class="m-0 font-weight-bold text-primary">Tren Produksi Sukses Harian</h6></div>
                 <div class="card-body">
-                    <div class="chart-area" style="height: 350px;"><canvas id="produksiChart"></canvas></div>
+                    <div style="height: 300px;">
+                        <canvas id="trenProduksiChart"></canvas>
+                    </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="m-0">Rincian Pencapaian Target</h6>
-                </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card card-warning shadow h-100">
+                <div class="card-header"><h6 class="m-0 font-weight-bold"><i class="fas fa-box-open"></i> Stok Kritis Bahan Baku</h6></div>
                 <div class="card-body">
-                    <?php if (empty($rincian_pencapaian)): ?>
-                        <div class="text-center p-4 text-muted">Belum ada rencana produksi pada periode ini.</div>
+                    <?php if (empty($stok_kritis)): ?>
+                        <p class="text-success mb-0"><i class="fas fa-check-circle"></i> Aman, semua stok di atas minimum.</p>
                     <?php else: ?>
-                        <?php foreach ($rincian_pencapaian as $rincian): ?>
-                            <?php $persen = ($rincian['target_produksi'] > 0) ? ($rincian['total_sukses'] / $rincian['target_produksi']) * 100 : 0; ?>
-                            <div class="mb-3">
-                                <h4 class="small fw-bold"><?php echo htmlspecialchars($rincian['nama_produk']); ?><span class="float-end text-muted"><?php echo "{$rincian['total_sukses']} / {$rincian['target_produksi']}"; ?></span></h4>
-                                <div class="progress" style="height: 10px;">
-                                    <div class="progress-bar" role="progressbar" style="width: <?php echo $persen; ?>%; background-color: var(--primary-color);" aria-valuenow="<?php echo $persen; ?>"></div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
+                        <ul class="list-group list-group-flush">
+                            <?php foreach($stok_kritis as $item): ?>
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <?php echo htmlspecialchars($item['nama_bahan']); ?>
+                                    <span class="badge bg-warning rounded-pill text-dark"><?php echo number_format($item['total_sisa']) . ' / ' . number_format($item['stok_minimum']) . ' ' . htmlspecialchars($item['satuan']); ?></span>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-4">
-            <div class="kpi-card">
-                <div class="kpi-icon bg-icon-primary"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                        <path fill="#ffffff" d="M160 80c0-26.5 21.5-48 48-48l32 0c26.5 0 48 21.5 48 48l0 352c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48l0-352zM0 272c0-26.5 21.5-48 48-48l32 0c26.5 0 48 21.5 48 48l0 160c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48L0 272zM368 96l32 0c26.5 0 48 21.5 48 48l0 288c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48z" />
-                    </svg></div>
-                <div class="kpi-content">
-                    <div class="kpi-label">Pencapaian Target</div>
-                    <div class="kpi-value"><?php echo number_format($persentase_pencapaian, 1); ?>%</div>
-                </div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon bg-icon-success"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </svg></div>
-                <div class="kpi-content">
-                    <div class="kpi-label">Efisiensi Bahan</div>
-                    <div class="kpi-value"><?php echo number_format($efisiensi_bahan, 1); ?>%</div>
-                </div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon bg-icon-danger"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                        <line x1="12" y1="9" x2="12" y2="13" />
-                        <line x1="12" y1="17" x2="12.01" y2="17" />
-                    </svg></div>
-                <div class="kpi-content">
-                    <div class="kpi-label">Produk Gagal</div>
-                    <div class="kpi-value"><?php echo number_format($total_gagal); ?></div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="m-0">Aktivitas Terkini</h6>
-                </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card card-danger shadow h-100">
+                <div class="card-header"><h6 class="m-0 font-weight-bold"><i class="fas fa-calendar-times"></i> Kadaluarsa Bahan Baku (<= 3 Hari)</h6></div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover">
-                            <tbody>
-                                <?php if (empty($aktivitas_terkini)): ?>
-                                    <tr>
-                                        <td class="text-center text-muted p-4">Belum ada aktivitas.</td>
-                                    </tr>
-                                <?php else: ?>
-                                    <?php foreach ($aktivitas_terkini as $aktivitas): ?>
-                                        <tr>
-                                            <td><strong><?php echo htmlspecialchars($aktivitas['nama_produk']); ?></strong><small class="d-block text-muted"><?php echo htmlspecialchars($aktivitas['jumlah_sukses']); ?> Pcs oleh <?php echo htmlspecialchars($aktivitas['nama_pengguna']); ?></small></td>
-                                            <td class="text-end text-muted small align-middle"><?php echo date('H:i', strtotime($aktivitas['tanggal_aktual'])); ?></td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                    <?php if (empty($stok_kadaluarsa)): ?>
+                        <p class="text-success mb-0"><i class="fas fa-check-circle"></i> Aman, tidak ada bahan baku kadaluarsa.</p>
+                    <?php else: ?>
+                        <ul class="list-group list-group-flush">
+                            <?php foreach($stok_kadaluarsa as $item): ?>
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <?php echo htmlspecialchars($item['nama_bahan']); ?>
+                                        <small class="d-block text-muted">Batch: <?php echo htmlspecialchars($item['kode_batch']); ?></small>
+                                    </div>
+                                    <span class="badge bg-danger rounded-pill"><?php echo $item['sisa_hari'] <= 0 ? 'Sudah Lewat' : $item['sisa_hari'] . ' hari lagi'; ?></span>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="card card-info shadow h-100">
+                <div class="card-header"><h6 class="m-0 font-weight-bold"><i class="fas fa-birthday-cake"></i> Kadaluarsa Produk Jadi (<= 1 Hari)</h6></div>
+                <div class="card-body">
+                    <?php if (empty($produk_jadi_kadaluarsa)): ?>
+                        <p class="text-success mb-0"><i class="fas fa-check-circle"></i> Aman, tidak ada produk jadi kadaluarsa.</p>
+                    <?php else: ?>
+                        <ul class="list-group list-group-flush">
+                        <?php foreach($produk_jadi_kadaluarsa as $item): ?>
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div>
+                                    <strong><?php echo htmlspecialchars($item['nama_produk']); ?></strong>
+                                    <small class="d-block text-muted">Batch: <?php echo htmlspecialchars($item['kode_batch']); ?> (Sisa: <?php echo $item['sisa_stok']; ?>)</small>
+                                </div>
+                                <?php
+                                    $sisa_hari_text = '';
+                                    if ($item['sisa_hari'] == 1) $sisa_hari_text = 'Besok';
+                                    elseif ($item['sisa_hari'] == 0) $sisa_hari_text = 'Hari Ini';
+                                    else $sisa_hari_text = 'Sudah Lewat';
+                                ?>
+                                <span class="badge bg-info rounded-pill"><?php echo $sisa_hari_text; ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                        </ul>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (document.getElementById('produksiChart')) {
-            const chartData = {
+document.addEventListener("DOMContentLoaded", function() {
+    const canvasElement = document.getElementById('trenProduksiChart');
+    if (canvasElement) {
+        const ctx = canvasElement.getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
                 labels: <?php echo json_encode($grafik_labels); ?>,
                 datasets: [{
-                    label: 'Total Produksi',
+                    label: 'Produksi Sukses (Pcs)',
                     data: <?php echo json_encode($grafik_data); ?>,
-                    backgroundColor: 'rgba(74, 144, 226, 0.1)',
-                    borderColor: 'rgba(74, 144, 226, 1)',
+                    borderColor: '#4e73df',
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
                     fill: true,
-                    tension: 0.4,
-                    borderWidth: 2,
-                    pointBackgroundColor: 'rgba(74, 144, 226, 1)'
+                    tension: 0.2, // Membuat garis sedikit melengkung
+                    pointBackgroundColor: '#4e73df',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 }]
-            };
-            const chartConfig = {
-                type: 'line',
-                data: chartData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            // Memastikan angka di sumbu Y adalah integer
+                            precision: 0
                         }
                     }
+                },
+                plugins: {
+                    legend: {
+                        display: false // Sembunyikan legenda jika hanya ada 1 dataset
+                    }
                 }
-            };
-            new Chart(document.getElementById('produksiChart'), chartConfig);
-        }
-    });
+            }
+        });
+    }
+});
 </script>
