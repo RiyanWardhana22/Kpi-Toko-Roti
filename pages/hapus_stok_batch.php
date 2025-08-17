@@ -1,39 +1,43 @@
 <?php
-// Pastikan hanya admin yang bisa mengakses
-if ($_SESSION['role'] !== 'Admin') {
-    exit('Akses ditolak.');
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
 }
+require_once 'config/database.php';
 
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
+    die('Akses ditolak.');
+}
 if (!isset($_GET['id'])) {
-    redirect(base_url('index.php?page=stok_harian'));
+    header('Location: ' . BASE_URL . 'index.php?page=stok_harian');
     exit();
 }
 
 $id_batch = (int)$_GET['id'];
 
 try {
-    // Langkah 1: Periksa apakah batch ini pernah digunakan di produksi
-    $stmt_check = $pdo->prepare("SELECT COUNT(*) FROM produksi_penggunaan_bahan WHERE id_batch = ?");
-    $stmt_check->execute([$id_batch]);
-    $usage_count = $stmt_check->fetchColumn();
+    $stmt_get_kode = $pdo->prepare("SELECT kode_batch FROM stok_batch WHERE id_batch = ?");
+    $stmt_get_kode->execute([$id_batch]);
+    $kode_batch = $stmt_get_kode->fetchColumn();
 
-    if ($usage_count > 0) {
-        // JIKA SUDAH PERNAH DIPAKAI: Jangan hapus, kirim notifikasi gagal
-        redirect(base_url('index.php?page=stok_harian&status=gagal_hapus_digunakan'));
-        exit();
+    if ($kode_batch) {
+        $stmt_check = $pdo->prepare("SELECT COUNT(*) FROM perintah_kerja_penggunaan_batch WHERE kode_batch_bahan = ?");
+        $stmt_check->execute([$kode_batch]);
+        $usage_count = $stmt_check->fetchColumn();
+
+        if ($usage_count > 0) {
+            $_SESSION['pesan_error'] = "Gagal menghapus! Batch '$kode_batch' sudah dialokasikan untuk sebuah Perintah Kerja. Batalkan Perintah Kerja tersebut terlebih dahulu.";
+        } else {
+            $stmt_delete = $pdo->prepare("DELETE FROM stok_batch WHERE id_batch = ?");
+            $stmt_delete->execute([$id_batch]);
+            $_SESSION['pesan_sukses'] = "Batch stok berhasil dihapus.";
+        }
+    } else {
+        $_SESSION['pesan_error'] = "Batch stok tidak ditemukan.";
     }
-
-    // Langkah 2: Jika belum pernah dipakai, lanjutkan proses hapus
-    $stmt_delete = $pdo->prepare("DELETE FROM stok_batch WHERE id_batch = ?");
-    $stmt_delete->execute([$id_batch]);
-
-    // Kirim notifikasi sukses
-    redirect(base_url('index.php?page=stok_harian&status=sukses_hapus'));
-    exit();
-
 } catch (PDOException $e) {
-    // Tangani jika ada error database lain
-    redirect(base_url('index.php?page=stok_harian&status=gagal'));
-    exit();
+    $_SESSION['pesan_error'] = "Terjadi kesalahan database: " . $e->getMessage();
 }
-?>
+
+session_write_close();
+header('Location: ' . BASE_URL . 'index.php?page=stok_harian');
+exit();

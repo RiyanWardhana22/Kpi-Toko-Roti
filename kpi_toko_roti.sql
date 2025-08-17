@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 17, 2025 at 07:34 AM
+-- Generation Time: Aug 17, 2025 at 06:02 PM
 -- Server version: 8.0.42
 -- PHP Version: 8.3.22
 
@@ -33,7 +33,7 @@ CREATE TABLE `bahan_baku` (
   `satuan` varchar(20) NOT NULL,
   `stok` int NOT NULL DEFAULT '0',
   `stok_minimum` int NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -45,7 +45,7 @@ CREATE TABLE `pengaturan` (
   `id_pengaturan` int NOT NULL,
   `nama_pengaturan` varchar(100) NOT NULL,
   `nilai_pengaturan` text
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `pengaturan`
@@ -68,7 +68,7 @@ CREATE TABLE `pengguna` (
   `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('Admin','Pegawai') NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `pengguna`
@@ -94,7 +94,7 @@ CREATE TABLE `perintah_kerja` (
   `tanggal_selesai` datetime DEFAULT NULL,
   `status` enum('Direncanakan','Berlangsung','Selesai','Dibatalkan') NOT NULL,
   `catatan` text
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -107,7 +107,7 @@ CREATE TABLE `perintah_kerja_penggunaan_batch` (
   `id_perintah_kerja` int NOT NULL,
   `kode_batch_bahan` varchar(50) NOT NULL,
   `jumlah_digunakan` decimal(10,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -121,7 +121,7 @@ CREATE TABLE `produk` (
   `masa_simpan_hari` int NOT NULL DEFAULT '0' COMMENT 'Umur simpan produk dalam hari',
   `catatan` text,
   `foto_produk` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -138,7 +138,7 @@ CREATE TABLE `produk_jadi_batch` (
   `sisa_stok` int NOT NULL,
   `tanggal_produksi` datetime NOT NULL,
   `tanggal_kadaluarsa` date NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -151,7 +151,7 @@ CREATE TABLE `resep` (
   `id_produk` int NOT NULL,
   `id_bahan_baku` int NOT NULL,
   `jumlah` decimal(10,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -171,7 +171,7 @@ CREATE TABLE `stok_batch` (
   `tanggal_masuk` date NOT NULL,
   `tanggal_kadaluarsa` date NOT NULL,
   `id_pengguna_input` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -188,7 +188,7 @@ CREATE TABLE `_arsip_produksi_log` (
   `jumlah_gagal` int NOT NULL,
   `alasan_gagal` text,
   `id_pengguna_input` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -202,7 +202,7 @@ CREATE TABLE `_arsip_produksi_penggunaan_bahan` (
   `id_bahan_baku` int NOT NULL,
   `id_batch` int NOT NULL,
   `jumlah_aktual` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -215,7 +215,7 @@ CREATE TABLE `_arsip_produksi_rencana` (
   `tanggal_produksi` date NOT NULL,
   `id_produk` int NOT NULL,
   `target_produksi` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Indexes for dumped tables
@@ -438,8 +438,7 @@ ALTER TABLE `_arsip_produksi_log`
 --
 ALTER TABLE `_arsip_produksi_penggunaan_bahan`
   ADD CONSTRAINT `_arsip_produksi_penggunaan_bahan_ibfk_1` FOREIGN KEY (`id_log`) REFERENCES `_arsip_produksi_log` (`id_log`) ON DELETE CASCADE,
-  ADD CONSTRAINT `_arsip_produksi_penggunaan_bahan_ibfk_2` FOREIGN KEY (`id_bahan_baku`) REFERENCES `bahan_baku` (`id_bahan_baku`),
-  ADD CONSTRAINT `_arsip_produksi_penggunaan_bahan_ibfk_3` FOREIGN KEY (`id_batch`) REFERENCES `stok_batch` (`id_batch`);
+  ADD CONSTRAINT `_arsip_produksi_penggunaan_bahan_ibfk_2` FOREIGN KEY (`id_bahan_baku`) REFERENCES `bahan_baku` (`id_bahan_baku`);
 
 --
 -- Constraints for table `_arsip_produksi_rencana`
