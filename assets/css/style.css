@@ -1,0 +1,277 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+
+:root {
+  --primary-color: #4a90e2;
+  --sidebar-bg: #ffffff;
+  --body-bg: #f4f7fc;
+  --card-bg: #ffffff;
+  --text-color: #333333;
+  --text-muted: #888888;
+  --sidebar-width: 260px;
+  --border-radius: 12px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+body {
+  background-color: var(--body-bg);
+  font-family: "Poppins", sans-serif;
+  color: var(--text-color);
+}
+
+/* DASHBOARD START */
+.kpi-card {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 1.5rem;
+}
+
+.kpi-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1.5rem;
+}
+
+.kpi-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #fff;
+}
+
+.kpi-content .kpi-label {
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.kpi-content .kpi-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.bg-icon-primary {
+  background-color: var(--primary-color);
+}
+
+.bg-icon-success {
+  background-color: #4caf50;
+}
+
+.bg-icon-danger {
+  background-color: #f44336;
+}
+/* DASHBOARD END */
+
+/* 3. Gaya Kartu & Tombol Modern */
+.card {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 1.5rem;
+}
+.card-header {
+  background-color: transparent;
+  border-bottom: 1px solid #eaeaea;
+  padding: 1.25rem;
+  font-weight: 600;
+}
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  border-radius: 8px;
+  padding: 10px 20px;
+}
+.btn-primary:hover {
+  background-color: #357abd;
+  border-color: #357abd;
+}
+.form-control {
+  border-radius: 8px;
+}
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.25rem rgba(74, 144, 226, 0.25);
+}
+
+/* 4. Redesain Sidebar (Tema Terang) */
+.sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: var(--sidebar-bg);
+  padding: 20px 15px;
+  z-index: 1030;
+  transition: transform 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-header {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  /* padding: 0 1rem 1.5rem 1rem; */
+  text-align: center;
+}
+.sidebar .nav-link {
+  color: var(--text-muted);
+  font-weight: 500;
+  padding: 12px 15px;
+  margin-bottom: 5px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+}
+.sidebar .nav-link .sidebar-icon {
+  margin-right: 15px;
+  width: 20px;
+  height: 20px;
+}
+
+.sidebar .nav-link:hover {
+  color: var(--primary-color);
+  background-color: #e9f2ff;
+}
+
+.sidebar .submenu {
+  padding-left: 20px;
+}
+
+.sidebar .submenu .dropdown-item {
+  padding: 10px 15px;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.sidebar .submenu .dropdown-item:hover {
+  border-left-color: var(--primary-color);
+  background-color: transparent;
+  color: var(--primary-color);
+}
+
+.sidebar .submenu .dropdown-item.active {
+  border-left-color: var(--primary-color);
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+/* Gaya untuk link aktif */
+.nav-item.active .nav-link {
+  color: #ffffff;
+  background-color: var(--primary-color);
+}
+.sidebar .dropdown-menu {
+  background-color: transparent;
+  border: none;
+  padding: 0 0 0 40px;
+}
+.sidebar .dropdown-item {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.logout-btn {
+  margin-top: auto;
+}
+
+/* 5. Redesain Topbar */
+.topbar {
+  height: 70px;
+  background-color: var(--card-bg);
+  padding: 0 1.5rem;
+}
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-color);
+}
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1029;
+  display: none;
+}
+.sidebar-overlay.show {
+  display: block;
+}
+
+/* PRODUKSI START */
+.table-modern {
+  width: 100%;
+}
+.table-modern thead th {
+  border: none;
+  border-bottom: 2px solid #eaeaea;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 1rem 1.25rem;
+  text-align: left;
+}
+.table-modern tbody td {
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 1rem 1.25rem;
+  vertical-align: middle;
+}
+.table-modern tbody tr:last-child td {
+  border-bottom: none;
+}
+.table-modern .fw-bold {
+  color: var(--text-color);
+}
+/* PRODUKSI END */
+
+/* 6. Media Queries untuk Responsif */
+@media (min-width: 992px) {
+  .content-wrapper {
+    margin-left: var(--sidebar-width);
+  }
+}
+
+@media (max-width: 991.98px) {
+  .sidebar {
+    transform: translateX(-100%);
+    box-shadow: var(--shadow);
+  }
+
+  .sidebar.show {
+    transform: translateX(0);
+  }
+
+  .content-wrapper {
+    margin-left: 0;
+  }
+
+  .hamburger-btn {
+    display: block;
+  }
+}
+
+@media (max-width: 450px) {
+  html {
+    font-size: 75%;
+  }
+}
