@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Aug 16, 2025 at 12:39 PM
--- Server version: 8.0.30
--- PHP Version: 8.3.14
+-- Generation Time: Aug 17, 2025 at 07:34 AM
+-- Server version: 8.0.42
+-- PHP Version: 8.3.22
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -34,16 +34,6 @@ CREATE TABLE `bahan_baku` (
   `stok` int NOT NULL DEFAULT '0',
   `stok_minimum` int NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `bahan_baku`
---
-
-INSERT INTO `bahan_baku` (`id_bahan_baku`, `nama_bahan`, `satuan`, `stok`, `stok_minimum`) VALUES
-(9, 'Tepung Roti', 'Kg', 0, 0),
-(10, 'Selai Coklat', 'Gram', 0, 0),
-(11, 'Telur', 'Butir', 0, 0),
-(12, 'Stroberi', 'Buah', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -85,8 +75,7 @@ CREATE TABLE `pengguna` (
 --
 
 INSERT INTO `pengguna` (`id_pengguna`, `nama_lengkap`, `username`, `password`, `role`) VALUES
-(1, 'Riyan Wardhana', 'riyan22', '$2y$10$pKUsDDgRkbxg7nUlAF6.L.ncxbiaz46pa/mRyKzg2QnbpT1yo8V7G', 'Admin'),
-(6, 'oka', 'oka123', '$2y$10$x.RJadQ.Le4lW8KLuuMgNOWP/42Zb5YqoyHNVEL8S7dh.RqnTW/eC', 'Admin');
+(1, 'Admin', 'Admin', '$2y$10$LFqcfW0kXKslc/t1IHSl4.XjIqFV9x8Gq1NiBRkUMClIADGb15iNu', 'Admin');
 
 -- --------------------------------------------------------
 
@@ -107,21 +96,6 @@ CREATE TABLE `perintah_kerja` (
   `catatan` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `perintah_kerja`
---
-
-INSERT INTO `perintah_kerja` (`id_perintah_kerja`, `id_produk`, `jumlah_direncanakan`, `jumlah_sukses`, `jumlah_gagal`, `tanggal_dibuat`, `tanggal_dimulai`, `tanggal_selesai`, `status`, `catatan`) VALUES
-(1, 15, 5, 5, 0, '2025-08-14 16:00:03', '2025-08-14 16:00:35', '2025-08-14 16:14:43', 'Selesai', 'Dijual'),
-(2, 15, 7, 5, 2, '2025-08-14 16:23:36', '2025-08-14 16:23:39', '2025-08-14 16:23:45', 'Selesai', 'stok hari ini'),
-(3, 14, 5, 4, 1, '2025-08-14 17:00:33', '2025-08-14 17:00:41', '2025-08-14 17:00:45', 'Selesai', 'Siap hari ini'),
-(4, 15, 2, 1, 1, '2025-08-16 17:08:53', '2025-08-16 19:12:03', '2025-08-16 19:12:13', 'Selesai', '1'),
-(5, 15, 1, 1, 0, '2025-08-16 18:57:53', '2025-08-16 19:02:54', '2025-08-16 19:03:02', 'Selesai', '1'),
-(6, 15, 1, 1, 0, '2025-08-16 19:03:10', '2025-08-16 19:03:45', '2025-08-16 19:03:57', 'Selesai', '1'),
-(7, 14, 1, 1, 0, '2025-08-16 19:06:31', '2025-08-16 19:06:36', '2025-08-16 19:10:20', 'Selesai', '1'),
-(8, 13, 1, 1, 0, '2025-08-16 19:12:37', '2025-08-16 19:12:40', '2025-08-16 19:12:48', 'Selesai', '1'),
-(9, 13, 2, 1, 1, '2025-08-16 19:30:57', '2025-08-16 19:31:01', '2025-08-16 19:31:09', 'Selesai', 'siapkan sekarang');
-
 -- --------------------------------------------------------
 
 --
@@ -134,41 +108,6 @@ CREATE TABLE `perintah_kerja_penggunaan_batch` (
   `kode_batch_bahan` varchar(50) NOT NULL,
   `jumlah_digunakan` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `perintah_kerja_penggunaan_batch`
---
-
-INSERT INTO `perintah_kerja_penggunaan_batch` (`id_penggunaan`, `id_perintah_kerja`, `kode_batch_bahan`, `jumlah_digunakan`) VALUES
-(1, 1, 'SEL-20250814085806', '100.00'),
-(2, 1, 'TEP-20250814085935', '5.00'),
-(3, 1, 'TEL-20250814085900', '5.00'),
-(4, 2, 'SEL-20250814085806', '140.00'),
-(5, 2, 'TEP-20250814085935', '7.00'),
-(6, 2, 'TEL-20250814085900', '7.00'),
-(7, 3, 'TEP-20250814085935', '5.00'),
-(8, 3, 'TEL-20250814085900', '8.00'),
-(9, 3, 'TEL-20250814100008', '2.00'),
-(10, 3, 'STR-20250814085825', '5.00'),
-(11, 4, 'SEL-20250814085806', '40.00'),
-(12, 4, 'TEP-20250814085935', '2.00'),
-(13, 4, 'TEL-20250814100008', '2.00'),
-(14, 5, 'SEL-20250814085806', '20.00'),
-(15, 5, 'TEP-20250814085935', '1.00'),
-(16, 5, 'TEL-20250814100008', '1.00'),
-(17, 6, 'SEL-20250814085806', '20.00'),
-(18, 6, 'TEP-20250814085935', '1.00'),
-(19, 6, 'TEL-20250814100008', '1.00'),
-(20, 7, 'TEP-20250814085935', '1.00'),
-(21, 7, 'TEL-20250814100008', '2.00'),
-(22, 7, 'STR-20250814085825', '1.00'),
-(23, 8, 'TEP-20250814085935', '1.00'),
-(24, 8, 'SEL-20250814085806', '20.00'),
-(25, 8, 'TEL-20250814100008', '2.00'),
-(26, 9, 'TEP-20250814085935', '2.00'),
-(27, 9, 'SEL-20250814085806', '40.00'),
-(28, 9, 'TEL-20250814100008', '2.00'),
-(29, 9, 'TEL-20250816123038', '2.00');
 
 -- --------------------------------------------------------
 
@@ -183,15 +122,6 @@ CREATE TABLE `produk` (
   `catatan` text,
   `foto_produk` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `produk`
---
-
-INSERT INTO `produk` (`id_produk`, `nama_produk`, `masa_simpan_hari`, `catatan`, `foto_produk`) VALUES
-(13, 'Roti Coklat', 1, NULL, NULL),
-(14, 'Kue Stroberi', 3, NULL, NULL),
-(15, 'Donat', 1, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -210,21 +140,6 @@ CREATE TABLE `produk_jadi_batch` (
   `tanggal_kadaluarsa` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `produk_jadi_batch`
---
-
-INSERT INTO `produk_jadi_batch` (`id_batch_produk`, `id_produk`, `id_perintah_kerja`, `kode_batch`, `jumlah_produksi`, `sisa_stok`, `tanggal_produksi`, `tanggal_kadaluarsa`) VALUES
-(6, 15, 1, 'PJ-20250814091443-15', 5, 5, '2025-08-14 09:14:43', '2025-08-17'),
-(7, 15, 2, 'PJ-20250814092345-15', 5, 5, '2025-08-14 09:23:45', '2025-08-15'),
-(8, 14, 3, 'PJ-20250814100045-14', 4, 4, '2025-08-14 10:00:45', '2025-08-17'),
-(9, 15, 5, 'PJ-20250816120302-15', 1, 1, '2025-08-16 12:03:02', '2025-08-17'),
-(10, 15, 6, 'PJ-20250816120357-15', 1, 1, '2025-08-16 12:03:57', '2025-08-17'),
-(11, 14, 7, 'PJ-20250816121020-14', 1, 1, '2025-08-16 12:10:20', '2025-08-19'),
-(12, 15, 4, '2211', 1, 1, '2025-08-16 12:12:13', '2025-08-17'),
-(13, 13, 8, '2007', 1, 1, '2025-08-16 12:12:48', '2025-08-17'),
-(14, 13, 9, '2233', 1, 1, '2025-08-16 12:31:09', '2025-08-17');
-
 -- --------------------------------------------------------
 
 --
@@ -237,21 +152,6 @@ CREATE TABLE `resep` (
   `id_bahan_baku` int NOT NULL,
   `jumlah` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `resep`
---
-
-INSERT INTO `resep` (`id_resep`, `id_produk`, `id_bahan_baku`, `jumlah`) VALUES
-(5, 13, 9, '1.00'),
-(6, 13, 10, '20.00'),
-(7, 13, 11, '2.00'),
-(8, 14, 9, '1.00'),
-(9, 14, 11, '2.00'),
-(10, 14, 12, '1.00'),
-(14, 15, 10, '20.00'),
-(15, 15, 9, '1.00'),
-(16, 15, 11, '1.00');
 
 -- --------------------------------------------------------
 
@@ -272,18 +172,6 @@ CREATE TABLE `stok_batch` (
   `tanggal_kadaluarsa` date NOT NULL,
   `id_pengguna_input` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `stok_batch`
---
-
-INSERT INTO `stok_batch` (`id_batch`, `kode_batch`, `id_bahan_baku`, `jumlah_display`, `satuan_display`, `jumlah_dasar`, `sisa_dasar`, `harga_per_satuan_dasar`, `tanggal_masuk`, `tanggal_kadaluarsa`, `id_pengguna_input`) VALUES
-(1, 'SEL-20250814085806', 10, '1000', 'Gram', '1000.00', '620.00', '25.00', '2025-08-14', '2025-08-21', 6),
-(2, 'STR-20250814085825', 12, '15', 'Buah', '15.00', '9.00', '2333.33', '2025-08-14', '2025-08-17', 6),
-(3, 'TEL-20250814085900', 11, '20', 'Butir', '20.00', '0.00', '2150.00', '2025-08-14', '2025-08-21', 6),
-(4, 'TEP-20250814085935', 9, '15000', 'Gram', '15000.00', '14975.00', '3.00', '2025-08-14', '2025-08-21', 6),
-(5, 'TEL-20250814100008', 11, '12', 'Butir', '12.00', '0.00', '2000.00', '2025-08-14', '2025-08-21', 6),
-(6, 'TEL-20250816123038', 11, '20', 'Butir', '20.00', '18.00', '2000.00', '2025-08-16', '2025-08-23', 6);
 
 -- --------------------------------------------------------
 
@@ -450,13 +338,13 @@ ALTER TABLE `pengguna`
 -- AUTO_INCREMENT for table `perintah_kerja`
 --
 ALTER TABLE `perintah_kerja`
-  MODIFY `id_perintah_kerja` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id_perintah_kerja` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `perintah_kerja_penggunaan_batch`
 --
 ALTER TABLE `perintah_kerja_penggunaan_batch`
-  MODIFY `id_penggunaan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id_penggunaan` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `produk`
@@ -468,19 +356,19 @@ ALTER TABLE `produk`
 -- AUTO_INCREMENT for table `produk_jadi_batch`
 --
 ALTER TABLE `produk_jadi_batch`
-  MODIFY `id_batch_produk` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id_batch_produk` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `resep`
 --
 ALTER TABLE `resep`
-  MODIFY `id_resep` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id_resep` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `stok_batch`
 --
 ALTER TABLE `stok_batch`
-  MODIFY `id_batch` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_batch` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `_arsip_produksi_log`
