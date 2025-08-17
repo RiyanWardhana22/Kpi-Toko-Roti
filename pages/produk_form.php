@@ -4,12 +4,12 @@
 // --- LOGIKA UNTUK MENANGANI MODE EDIT & TAMBAH ---
 $is_edit_mode = isset($_GET['id']) && !empty($_GET['id']);
 $id_produk_edit = null;
-$produk_data = ['nama_produk' => '', 'masa_simpan_hari' => '']; 
+$produk_data = ['nama_produk' => '', 'masa_simpan_hari' => ''];
 $resep_data = [];
 
 if ($is_edit_mode) {
     $id_produk_edit = (int)$_GET['id'];
-    
+
     $stmt_produk = $pdo->prepare("SELECT * FROM produk WHERE id_produk = ?");
     $stmt_produk->execute([$id_produk_edit]);
     $produk_data = $stmt_produk->fetch(PDO::FETCH_ASSOC);
@@ -25,7 +25,7 @@ $semua_bahan_baku = $stmt_bahan->fetchAll(PDO::FETCH_ASSOC);
 // --- LOGIKA PENYIMPANAN DATA (UPDATE & INSERT) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $is_edit_from_post = isset($_POST['id_produk']) && !empty($_POST['id_produk']);
-    
+
     $nama_produk = $_POST['nama_produk'];
     $masa_simpan_hari = $_POST['masa_simpan_hari'];
     $resep_bahan = isset($_POST['resep']) ? $_POST['resep'] : [];
@@ -40,7 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $stmt_delete_resep = $pdo->prepare("DELETE FROM resep WHERE id_produk = ?");
             $stmt_delete_resep->execute([$id_produk_target]);
-
         } else {
             $stmt_produk = $pdo->prepare("INSERT INTO produk (nama_produk, masa_simpan_hari) VALUES (?, ?)");
             $stmt_produk->execute([$nama_produk, $masa_simpan_hari]);
@@ -55,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $pdo->commit();
-        
+
         // ===================================================================
         //               PERBAIKAN UTAMA MENGGUNAKAN BASE_URL
         // ===================================================================
@@ -90,17 +89,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="nama_produk" class="form-label">Nama Produk</label>
                     <input type="text" class="form-control" id="nama_produk" name="nama_produk" value="<?php echo htmlspecialchars($produk_data['nama_produk']); ?>" required>
                 </div>
-                
+
                 <div class="mb-4">
                     <label for="masa_simpan_hari" class="form-label">Masa Simpan (dalam Hari)</label>
                     <input type="number" class="form-control" id="masa_simpan_hari" name="masa_simpan_hari" value="<?php echo htmlspecialchars($produk_data['masa_simpan_hari'] ?? '0'); ?>" min="0" required>
                     <small class="form-text text-muted">Berapa hari produk ini layak jual setelah diproduksi?</small>
                 </div>
                 <hr>
-                
+
                 <h6 class="mb-3">Resep Bahan Baku</h6>
                 <div id="resep-container">
-                    </div>
+                </div>
 
                 <button type="button" id="tambah-bahan-btn" class="btn btn-sm btn-outline-success mt-2">
                     <i class="fa-solid fa-plus"></i> Tambah Bahan
@@ -108,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="card-footer text-end">
-                <a href="<?php echo BASE_URL; ?>index.php?page=produk" class="btn btn-secondary">Batal</a>
+                <a href="<?php echo base_url('index.php?page=produk'); ?>" class="btn btn-secondary">Batal</a>
                 <button type="submit" class="btn btn-primary">Simpan</button>
             </div>
         </form>
@@ -135,56 +134,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <div class="col-md-2">
             <button type="button" class="btn btn-danger btn-sm hapus-bahan-btn w-100">
-                <i class="fa-solid fa-trash"></i> Hapusa
+                <i class="fa-solid fa-trash"></i> Hapus
             </button>
         </div>
     </div>
 </template>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('resep-container');
+        const addButton = document.getElementById('tambah-bahan-btn');
+        const template = document.getElementById('resep-row-template');
+        let resepIndex = 0;
 
-document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('resep-container');
-    const addButton = document.getElementById('tambah-bahan-btn');
-    const template = document.getElementById('resep-row-template');
-    let resepIndex = 0;
-
-    function addResepRow(data = null) {
-        const fragment = template.content.cloneNode(true);
-        const newRow = fragment.querySelector('.resep-row');
-        newRow.innerHTML = newRow.innerHTML.replace(/\[INDEX\]/g, `[${resepIndex}]`);
-        const select = newRow.querySelector('select');
-        const jumlahInput = newRow.querySelector('input[type="number"]');
-        select.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const satuanElement = this.closest('.resep-row').querySelector('.satuan-text');
-            if (satuanElement) {
-                satuanElement.textContent = selectedOption.getAttribute('data-satuan') || 'Satuan';
+        function addResepRow(data = null) {
+            const fragment = template.content.cloneNode(true);
+            const newRow = fragment.querySelector('.resep-row');
+            newRow.innerHTML = newRow.innerHTML.replace(/\[INDEX\]/g, `[${resepIndex}]`);
+            const select = newRow.querySelector('select');
+            const jumlahInput = newRow.querySelector('input[type="number"]');
+            select.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const satuanElement = this.closest('.resep-row').querySelector('.satuan-text');
+                if (satuanElement) {
+                    satuanElement.textContent = selectedOption.getAttribute('data-satuan') || 'Satuan';
+                }
+            });
+            const hapusButton = newRow.querySelector('.hapus-bahan-btn');
+            hapusButton.addEventListener('click', function() {
+                this.closest('.resep-row').remove();
+            });
+            if (data) {
+                select.value = data.id_bahan_baku;
+                jumlahInput.value = data.jumlah;
+                select.dispatchEvent(new Event('change'));
             }
-        });
-        const hapusButton = newRow.querySelector('.hapus-bahan-btn');
-        hapusButton.addEventListener('click', function() {
-            this.closest('.resep-row').remove();
-        });
-        if (data) {
-            select.value = data.id_bahan_baku;
-            jumlahInput.value = data.jumlah;
-            select.dispatchEvent(new Event('change'));
+            container.appendChild(newRow);
+            resepIndex++;
         }
-        container.appendChild(newRow);
-        resepIndex++;
-    }
 
-    const resepDataFromPHP = <?php echo json_encode($resep_data); ?>;
-    if (resepDataFromPHP && resepDataFromPHP.length > 0) {
-        resepDataFromPHP.forEach(function(resep) {
-            addResepRow(resep);
+        const resepDataFromPHP = <?php echo json_encode($resep_data); ?>;
+        if (resepDataFromPHP && resepDataFromPHP.length > 0) {
+            resepDataFromPHP.forEach(function(resep) {
+                addResepRow(resep);
+            });
+        } else {
+            addResepRow();
+        }
+        addButton.addEventListener('click', function() {
+            addResepRow();
         });
-    } else {
-        addResepRow();
-    }
-    addButton.addEventListener('click', function() {
-        addResepRow();
     });
-});
 </script>
